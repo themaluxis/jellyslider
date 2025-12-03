@@ -33,7 +33,7 @@ const updatePlaybackUI = (isPlaying) => {
 };
 
 const handlePlaybackError = (error, action = 'play') => {
-  console.error(`Oynatma sırasında hata oluştu ${action}:`, error);
+  console.error(`Error occurred during playback ${action}:`, error);
   const t = musicPlayerState.playlist[musicPlayerState.currentIndex];
   if (t && musicPlayerState.isPlayingReported) {
     reportPlaybackStopped(t, convertSecondsToTicks(musicPlayerState.audio?.currentTime || 0));
@@ -101,7 +101,7 @@ let _loadedMetaRetryT = null;
 
 
 function handlePlayError() {
-  console.error("Şarkı yükleme hatası:", musicPlayerState.audio.src);
+  console.error("Error loading track:", musicPlayerState.audio.src);
   const t = musicPlayerState.playlist[musicPlayerState.currentIndex];
   if (t && musicPlayerState.isPlayingReported) {
     reportPlaybackStopped(t, convertSecondsToTicks(musicPlayerState.audio?.currentTime || 0));
@@ -177,7 +177,7 @@ export function togglePlayPause() {
   const { audio } = musicPlayerState;
 
   if (!audio) {
-    console.warn('Ses okunamadı');
+    console.warn('Audio could not be read');
     return;
   }
 
@@ -492,7 +492,7 @@ async function loadAlbumArt(track) {
       cacheForOffline(track.Id, 'artwork', artwork);
     }
   } catch (err) {
-    console.error("Albüm kapağı yükleme hatası:", err);
+    console.error("Error loading album art:", err);
     setAlbumArt(DEFAULT_ARTWORK);
   }
 }
@@ -515,7 +515,7 @@ async function getArtworkFromSources(track) {
 
     return DEFAULT_ARTWORK;
   } catch (error) {
-    console.error("Artwork alınırken hata:", error);
+    console.error("Error retrieving artwork:", error);
     return DEFAULT_ARTWORK;
   }
 }
@@ -617,7 +617,7 @@ function getAudioUrl(track) {
   if (musicPlayerState.playlistSource === "jellyfin") {
     const trackId = track.Id || track.id;
     if (!trackId) {
-      console.error("Parça Id Bulunamadı:", track);
+      console.error("Track ID not found:", track);
       return null;
     }
 
@@ -685,10 +685,10 @@ async function reportPlaybackStart(track) {
     });
 
     if (!response.ok) {
-      console.error("Oynatma başlatma raporu gönderilemedi:", response.status);
+      console.error("Playback start report could not be sent:", response.status);
     }
   } catch (error) {
-    console.error("Oynatma raporlama hatası:", error);
+    console.error("Playback reporting error:", error);
   }
 }
 
@@ -713,10 +713,10 @@ async function reportPlaybackStopped(track, positionTicks) {
     });
 
     if (!response.ok) {
-      console.error("Oynatma durdurma raporu gönderilemedi:", response.status);
+      console.error("Playback stop report could not be sent:", response.status);
     }
   } catch (error) {
-    console.error("Oynatma durdurma raporlama hatası:", error);
+    console.error("Playback stop reporting error:", error);
   }
 }
 

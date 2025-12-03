@@ -30,14 +30,14 @@ export async function showGenreFilterModal() {
       }
     );
 
-    if (!response.ok) throw new Error("Türler alınamadı");
+    if (!response.ok) throw new Error("Genres could not be retrieved");
 
     const data = await response.json();
     const genres = data.Items || [];
 
     if (genres.length === 0) {
       showNotification(
-        `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.noGenresFound || "Tür bulunamadı"}`,
+        `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.noGenresFound || "No genres found"}`,
         2000,
         "error"
       );
@@ -47,9 +47,9 @@ export async function showGenreFilterModal() {
     buildModal(genres, token);
   } catch (err) {
     if (err?.name === "AbortError") return;
-    console.error("Tür filtresi açılırken hata:", err);
+    console.error("Error opening genre filter:", err);
     showNotification(
-      `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels?.genreFilterError || "Tür filtresi yüklenemedi"}`,
+      `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels?.genreFilterError || "Genre filter failed to load"}`,
       2000,
       "error"
     );

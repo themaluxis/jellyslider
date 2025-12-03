@@ -52,7 +52,7 @@ function waitForElement(selector, timeout = 5000) {
 
     const to = setTimeout(() => {
       observer.disconnect();
-      reject(new Error(`Zaman aşımı bekleniyor ${selector}`));
+      reject(new Error(`Timed out waiting for ${selector}`));
     }, timeout);
     const cleanupResolve = (el) => {
       clearTimeout(to);
@@ -93,7 +93,7 @@ function createPlayerButton() {
     btn.type = "button";
     btn.className = "headerSyncButton syncButton headerButton headerButtonRight paper-icon-button-light";
     btn.setAttribute("is", "paper-icon-button-light");
-    btn.setAttribute("aria-label", "GMMP Aç/Kapa");
+    btn.setAttribute("aria-label", "Toggle GMMP");
     btn.title = "GMMP";
     btn.innerHTML = `<i class="material-icons gmmp" aria-hidden="true">play_arrow</i>`;
     return btn;
@@ -135,7 +135,7 @@ async function onToggleClick() {
       checkForNewMusic();
     }
   } catch (err) {
-    console.error("GMMP geçiş hatası:", err);
+    console.error("GMMP toggle error:", err);
   } finally {
     initInProgress = false;
   }

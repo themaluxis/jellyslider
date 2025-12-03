@@ -487,7 +487,7 @@ export function applySettings(reload = false) {
         config.avatarGradient !== updatedConfig.avatarGradient;
 
     if (avatarSettingsChanged) {
-        console.log("Avatar ayarları değişti, hemen güncelleniyor...");
+        console.log("Avatar settings changed, updating immediately...");
         clearAvatarCache();
         updateHeaderUserAvatar();
     } else {
@@ -511,7 +511,7 @@ export function applyRawConfig(config) {
         localStorage.setItem(key, String(value));
       }
     } catch (e) {
-      console.warn(`'${key}' değeri ayarlanamadı:`, e);
+      console.warn(`'${key}' value could not be set:`, e);
     }
   });
 

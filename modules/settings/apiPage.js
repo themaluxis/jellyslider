@@ -246,7 +246,7 @@ export function createQueryPanel(config, labels) {
     const finalDesc = document.createElement('div');
     finalDesc.className = 'description-text';
     finalDesc.innerHTML = labels.customQueryStringDescription ||
-      'Bu ayar, slider için özel bir sorgu dizesi belirlemenizi sağlar. Tanımlı \'IncludeItemTypes\' itemleri: Movie, BoxSet ve Series\'dir. Anahtar Kelimeler alanı ise karıştırma yapılmaması gereken değerler içindir. Detaylar İçin <a href="https://api.jellyfin.org" target="_blank">burayı ziyaret edin.</a>.';
+      'This setting allows you to specify a custom query string for the slider. Defined \'IncludeItemTypes\' items are: Movie, BoxSet and Series. The Keywords field is for values that should not be shuffled. For details, visit <a href="https://api.jellyfin.org" target="_blank">here</a>.';
     section.appendChild(finalDesc);
 
     function handleSelection(selectedCheckbox) {

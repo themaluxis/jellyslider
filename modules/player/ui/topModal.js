@@ -505,14 +505,14 @@ async function loadTracks() {
       headers: { "X-Emby-Token": token }
     });
 
-    if (!response.ok) throw new Error('Şarkılar yüklenemedi');
+    if (!response.ok) throw new Error('Songs could not be loaded');
 
     const data = await response.json();
     allTracks = data.Items || [];
 
     if (allTracks.length === 0) {
       grid.innerHTML = `<div class="no-tracks">${
-        config.languageLabels.noTracks || 'Şarkı bulunamadı'
+        config.languageLabels.noTracks || 'No tracks found'
       }</div>`;
       return;
     }
@@ -649,7 +649,7 @@ async function loadTrackImage(track, element) {
 
     element.style.backgroundImage = DEFAULT_ARTWORK;
   } catch (error) {
-    console.error('Şarkı görseli yüklenemedi:', error);
+    console.error('Track image could not be loaded:', error);
     element.style.backgroundImage = DEFAULT_ARTWORK;
   }
 }

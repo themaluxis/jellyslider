@@ -71,7 +71,7 @@ export class MusicDB {
             };
 
             request.onerror = (event) => {
-                console.error('Veritabanı açılırken hata:', event.target.error);
+                console.error('Error opening database:', event.target.error);
                 reject(event.target.error);
             };
         });
@@ -86,7 +86,7 @@ export class MusicDB {
 
             request.onsuccess = () => resolve(request.result || []);
             request.onerror = (event) => {
-                console.error('Parçalar alınırken hata:', event.target.error);
+                console.error('Error fetching tracks:', event.target.error);
                 reject(event.target.error);
             };
         });
@@ -118,7 +118,7 @@ export class MusicDB {
                 resolve(cursor ? cursor.value : null);
             };
             request.onerror = (event) => {
-                console.error('Son parça alınırken hata:', event.target.error);
+                console.error('Error fetching last track:', event.target.error);
                 reject(event.target.error);
             };
         });
@@ -171,7 +171,7 @@ export class MusicDB {
         Promise.all(ops)
             .then(() => resolve())
             .catch(error => {
-                console.error('Parçalar kaydedilirken hata:', error);
+                console.error('Error saving tracks:', error);
                 reject(error);
             });
     });
@@ -218,11 +218,11 @@ export class MusicDB {
 
                 transaction.oncomplete = () => resolve();
                 transaction.onerror = (event) => {
-                    console.error('Parçalar silinirken hata:', event.target.error);
+                    console.error('Error deleting tracks:', event.target.error);
                     reject(event.target.error);
                 };
             } catch (error) {
-                console.error('Silinecek parçalar alınırken hata:', error);
+                console.error('Error fetching tracks to delete:', error);
                 reject(error);
             }
         });
@@ -260,7 +260,7 @@ export class MusicDB {
 
             request.onsuccess = () => resolve();
             request.onerror = (event) => {
-                console.error('Tüm parçalar silinirken hata:', event.target.error);
+                console.error('Error clearing all tracks:', event.target.error);
                 reject(event.target.error);
             };
         });
@@ -286,7 +286,7 @@ export class MusicDB {
 
             request.onsuccess = () => resolve(request.result);
             request.onerror = (event) => {
-                console.error('Parça sayısı alınırken hata:', event.target.error);
+                console.error('Error getting track count:', event.target.error);
                 reject(event.target.error);
             };
         });
@@ -380,7 +380,7 @@ export class MusicDB {
 
         request.onsuccess = () => resolve(request.result?.lyrics || null);
         request.onerror = (event) => {
-            console.error('Şarkı sözleri alınırken hata:', event.target.error);
+            console.error('Error fetching lyrics:', event.target.error);
             reject(event.target.error);
         };
     });
@@ -402,7 +402,7 @@ async saveLyrics(trackId, lyricsData) {
 
         request.onsuccess = () => resolve();
         request.onerror = (event) => {
-            console.error('Şarkı sözleri kaydedilirken hata:', event.target.error);
+            console.error('Error saving lyrics:', event.target.error);
             reject(event.target.error);
         };
     });
@@ -417,7 +417,7 @@ async deleteLyrics(trackId) {
 
         request.onsuccess = () => resolve();
         request.onerror = (event) => {
-            console.error('Şarkı sözleri silinirken hata:', event.target.error);
+            console.error('Error deleting lyrics:', event.target.error);
             reject(event.target.error);
         };
     });
@@ -447,7 +447,7 @@ async deleteLyrics(trackId) {
 
         request.onsuccess = () => resolve(request.result || []);
         request.onerror = (event) => {
-            console.error('Şarkı sözleri alınırken hata:', event.target.error);
+            console.error('Error fetching all lyrics:', event.target.error);
             reject(event.target.error);
         };
     });
@@ -462,7 +462,7 @@ async deleteLyrics(trackId) {
 
             request.onsuccess = () => resolve(request.result);
             request.onerror = (event) => {
-                console.error('Şarkı sözü sayısı alınırken hata:', event.target.error);
+                console.error('Error getting lyrics count:', event.target.error);
                 reject(event.target.error);
             };
         });

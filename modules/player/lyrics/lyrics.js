@@ -338,7 +338,7 @@ export async function getEmbeddedLyrics(trackId) {
       headers: { "X-Emby-Token": token },
       signal: fetchAbort.signal
     });
-    if (!response.ok) throw new Error("Stream alınamadı");
+    if (!response.ok) throw new Error("Stream could not be retrieved");
 
     const buffer = await response.arrayBuffer();
     const lyrics = await parseID3Tags(buffer);
@@ -679,7 +679,7 @@ async function updateSingleTrackLyrics(trackId) {
       }
     }
   } catch (err) {
-    console.error("Şarkı sözü güncelleme hatası:", err);
+    console.error("Error updating lyrics:", err);
     showNotification(
       `<i class="fas fa-subtitles-slash"></i> ${config.languageLabels.syncSingleError}`,
       2000,
