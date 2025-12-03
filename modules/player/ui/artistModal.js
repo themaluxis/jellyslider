@@ -983,14 +983,14 @@ export async function checkForNewMusic() {
 
     if (added.length) {
       showNotification(
-        `<i class="fas fa-database"></i> ${added.length} ${config.languageLabels.dbnewTracksAdded || "yeni şarkı eklendi"}`,
+        `<i class="fas fa-database"></i> ${added.length} ${config.languageLabels.dbnewTracksAdded || "new tracks added"}`,
         4000,
         "db"
       );
     }
     if (deleted.length) {
       showNotification(
-        `<i class="fas fa-database"></i> ${deleted.length} ${config.languageLabels.dbtracksRemoved || "şarkı silindi"}`,
+        `<i class="fas fa-database"></i> ${deleted.length} ${config.languageLabels.dbtracksRemoved || "tracks removed"}`,
         4000,
         "db"
       );
@@ -1011,9 +1011,9 @@ export async function checkForNewMusic() {
     }
   } catch (error) {
     if (error?.name === "AbortError") return;
-    console.error("Müzik senkronizasyonu sırasında hata:", error);
+    console.error("Error during music synchronization:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels.syncError || "Senkronizasyon sırasında hata oluştu"}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels.syncError || "Error occurred during synchronization"}`,
       4000,
       "error"
     );
@@ -1392,7 +1392,7 @@ export async function toggleArtistModal(show, artistName = "", artistId = null) 
     if (artistId) await loadArtistImage(artistId);
     updateSelectAllLabel();
   } catch (error) {
-    console.error("Modal açılırken hata:", error);
+    console.error("Error opening modal:", error);
   }
 } else {
   abortAllFetches();
@@ -1620,11 +1620,11 @@ async function loadExistingPlaylists(selectElement) {
     });
     selectElement.disabled = false;
   } catch (error) {
-    console.error("Listeler yüklenirken hata:", error);
+    console.error("Error loading lists:", error);
     selectElement.innerHTML = "";
     const errOpt = document.createElement("option");
     errOpt.value = "";
-    errOpt.textContent = config.languageLabels.loadError || "Listeler yüklenemedi";
+    errOpt.textContent = config.languageLabels.loadError || "Lists could not be loaded";
     selectElement.appendChild(errOpt);
     selectElement.disabled = true;
   }

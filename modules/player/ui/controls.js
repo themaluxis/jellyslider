@@ -73,7 +73,7 @@ function notifyVolumeThrottled(volume, isMuted = false) {
 
 function updateVolumeUI(volume, isMuted = false) {
   if (!areVolumeControlsReady()) {
-    console.warn('Ses kontrolleri güncelleme için hazır değil');
+    console.warn('Volume controls not ready for update');
     return;
   }
 
@@ -86,8 +86,8 @@ export function toggleMute() {
   const { audio, volumeBtn, volumeSlider } = musicPlayerState;
 
   if (!audio || !volumeBtn || !volumeSlider) {
-    console.error('Ses kontrolleri başlatılamadı');
-    showNotification('<i class="fas fa-volume-mute crossed-icon"></i> Ses kontrolleri yüklenemedi', 2000, 'error');
+    console.error('Volume controls could not be initialized');
+    showNotification('<i class="fas fa-volume-mute crossed-icon"></i> Volume controls failed to load', 2000, 'error');
     return;
   }
 
@@ -113,7 +113,7 @@ export function toggleMute() {
 
 export function changeVolume(delta) {
   if (!areVolumeControlsReady()) {
-    console.error('Ses kontrolleri başlatılamadı');
+    console.error('Volume controls could not be initialized');
     return;
   }
 
@@ -138,7 +138,7 @@ export function changeVolume(delta) {
 export function setupVolumeControls() {
   const slider = musicPlayerState.volumeSlider;
   if (!slider) {
-    console.warn('Ses kaydırıcısı bulunamadı');
+    console.warn('Volume slider not found');
     return;
   }
 
@@ -172,7 +172,7 @@ export function toggleRepeatMode() {
 
   const repeatBtn = document.querySelector('.player-btn .fa-repeat, .player-btn .fa-repeat-1')?.parentElement;
   if (!repeatBtn) {
-    console.warn('Tekrar butonu bulunamadı');
+    console.warn('Repeat button not found');
     return;
   }
 
@@ -209,7 +209,7 @@ export function toggleRepeatMode() {
 
 export function toggleShuffle() {
   if (!musicPlayerState || !musicPlayerState.userSettings) {
-    console.error('Müzik çalar durumu veya kullanıcı ayarları yüklenmedi');
+    console.error('Music player state or user settings not loaded');
     return;
   }
 
@@ -218,7 +218,7 @@ export function toggleShuffle() {
 
   const shuffleBtn = document.querySelector('.player-btn .fa-random')?.parentElement;
   if (!shuffleBtn) {
-    console.warn('Karıştırma butonu bulunamadı');
+    console.warn('Shuffle button not found');
     return;
   }
 

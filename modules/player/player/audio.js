@@ -16,7 +16,7 @@ export function handleSongEnd() {
   switch (musicPlayerState.userSettings.repeatMode) {
     case "one":
       musicPlayerState.audio.currentTime = 0;
-      musicPlayerState.audio.play().catch(e => console.error("Oynatma hatası:", e));
+      musicPlayerState.audio.play().catch(e => console.error("Playback error:", e));
       break;
     case "all":
       playNext();

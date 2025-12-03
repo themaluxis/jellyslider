@@ -54,7 +54,7 @@ function updateMediaPositionState() {
         position: musicPlayerState.audio.currentTime
       });
     } catch (e) {
-      console.warn("MediaSession konum durumu güncellemesi başarısız:", e);
+      console.warn("MediaSession position state update failed:", e);
     }
   }
 }
@@ -69,7 +69,7 @@ export function initMediaSessionHandlers() {
     if (!audio) return;
 
     navigator.mediaSession.setActionHandler("play", () => {
-      audio.play().catch(e => console.error("Oynatma hatası:", e));
+      audio.play().catch(e => console.error("Playback error:", e));
     });
     navigator.mediaSession.setActionHandler("pause", () => {
       audio.pause();
@@ -113,7 +113,7 @@ export function initMediaSessionHandlers() {
     });
 
   } catch (error) {
-    console.warn("MediaSession eylem işleyicisi desteklenmiyor:", error);
+    console.warn("MediaSession action handler not supported:", error);
   }
 }
 

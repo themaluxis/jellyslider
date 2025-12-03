@@ -153,7 +153,7 @@ export function createButtons(slide, config, UserData, itemId, RemoteTrailers, u
             try {
                 await castToCurrentDevice(itemId);
             } catch (error) {
-                console.error("Cast işlemi başarısız:", error);
+                console.error("Cast operation failed:", error);
                 window.location.href = slide.dataset.detailUrl;
             }
         }
@@ -176,7 +176,7 @@ export function createButtons(slide, config, UserData, itemId, RemoteTrailers, u
         const details = await fetchItemDetails(item.Id);
         isFav = Boolean(details.UserData?.IsFavorite);
       } catch (err) {
-        console.warn("Favori durumu alınamadı, varsayılan false ile açılıyor", err);
+        console.warn("Could not retrieve favorite status, defaulting to false", err);
       }
       openTrailerModal(
         trailer.Url,
@@ -270,7 +270,7 @@ async function castToCurrentDevice(itemId) {
       showNotification(config.languageLabels.casthata, 'error');
     }
   } catch (error) {
-    console.error('Cast işlemi sırasında hata:', error);
+    console.error('Cast operation error:', error);
     const config = getConfig();
     showNotification(`${config.languageLabels.casthata}: ${error.message}`, 'error');
   }
@@ -294,7 +294,7 @@ async function startNowPlayback(itemId, sessionId) {
     showNotification(config.languageLabels.castbasarili, 'success');
     return true;
   } catch (error) {
-    console.error("Oynatma hatası:", error);
+    console.error("Playback error:", error);
     const config = getConfig();
     showNotification(`${config.languageLabels.castoynatmahata}: ${error.message}`, 'error');
     return false;
