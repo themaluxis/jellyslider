@@ -132,7 +132,7 @@ function onAuthProfileChanged(prev, next) {
     prev.serverId !== next.serverId ||
     prev.accessToken !== next.accessToken;
   if (changed) {
-    console.log("🔐 Auth profili değişti → tüm cache’ler temizleniyor");
+    console.log("🔐 Auth profile changed → clearing all caches");
     nukeAllCachesAndLocalUserCaches();
   }
 }
@@ -273,7 +273,7 @@ export async function fetchLocalTrailers(itemId, { signal } = {}) {
   try {
     const res = await fetch(url, { headers, signal, credentials: 'same-origin' });
     if (res.status === 401) {
-      console.warn('fetchLocalTrailers: 401 Unauthorized (token eksik/yanlış?)');
+      console.warn('fetchLocalTrailers: 401 Unauthorized (token missing/invalid?)');
       return [];
     }
     if (res.status === 404) return [];
@@ -332,7 +332,7 @@ async function safeFetch(url, opts = {}) {
   let token = "";
   try { token = getSessionInfo()?.accessToken || ""; } catch {}
   if (!token && requiresAuth(url)) {
-    const e = new Error("Giriş yapılmadı: access token yok.");
+    const e = new Error("Not logged in: no access token.");
     e.status = 401;
     throw e;
   }
@@ -352,7 +352,7 @@ async function safeFetch(url, opts = {}) {
     const now = Date.now();
     const inWarmup = (now - __authWarmupStart) < AUTH_WARMUP_MS;
     if (inWarmup) {
-      const err = new Error("Yetkisiz (401) – auth warmup sırasında olabilir.");
+      const err = new Error("Unauthorized (401) – might be during auth warmup.");
       err.status = 401;
       throw err;
     }
@@ -362,7 +362,7 @@ async function safeFetch(url, opts = {}) {
     try {
       clearPersistedIdentity();
     } catch {}
-    const err = new Error("Oturum geçersiz (401) – kimlik temizlendi, tekrar giriş gerekli.");
+    const err = new Error("Session invalid (401) – identity cleared, login required.");
     err.status = 401;
     throw err;
   }
@@ -511,7 +511,7 @@ export function getSessionInfo() {
         clientVersion: hints.clientVersion || "1.0.0",
       };
     }
-    throw new Error("Kimlik bilgisi bulunamadı.");
+    throw new Error("Identity information not found.");
   }
   const parsed = JSON.parse(raw);
   const hints = getWebClientHints();
@@ -610,7 +610,7 @@ export function getSessionInfo() {
     return result;
   }
   throw new Error(
-    "Kimlik bilgisi eksik: ne top-level ne de Servers[0] altından gerekli alanlar bulunamadı"
+    "Identity information missing: required fields not found under top-level or Servers[0]"
   );
 }
 
@@ -624,7 +624,7 @@ async function makeApiRequest(url, options = {}) {
     let token = "";
     try { token = getSessionInfo()?.accessToken || ""; } catch {}
     if (!token && requiresAuth(url)) {
-      const e = new Error("Giriş yapılmadı: access token yok.");
+      const e = new Error("Not logged in: no access token.");
       e.status = 401;
       throw e;
     }
@@ -646,12 +646,12 @@ async function makeApiRequest(url, options = {}) {
         };
         return await makeApiRequest(url, retryOpts);
       }
-      const err = new Error("Oturum geçersiz veya yetkisiz (401).");
+      const err = new Error("Session invalid or unauthorized (401).");
       err.status = 401;
       throw err;
     }
     if (response.status === 403) {
-      const err = new Error(`Yetki yok (403): ${url}`);
+      const err = new Error(`Unauthorized (403): ${url}`);
       err.status = 403;
       throw err;
     }
@@ -661,7 +661,7 @@ async function makeApiRequest(url, options = {}) {
         errorData.message ||
         (errorData.Title && errorData.Description
           ? `${errorData.Title}: ${errorData.Description}`
-          : `API isteği başarısız oldu (durum: ${response.status})`);
+          : `API request failed (status: ${response.status})`);
 
       const err = new Error(errorMsg);
       err.status = response.status;
@@ -684,7 +684,7 @@ async function makeApiRequest(url, options = {}) {
     const is404 = error?.status === 404 || msg.includes("404");
     const is401 = error?.status === 401 || msg.includes("401");
     if (!is403 && !is404 && !is401) {
-      console.error(`${options?.method || "GET"} ${url} için API isteği hatası:`, error);
+      console.error(`API request error for ${options?.method || "GET"} ${url}:`, error);
     }
     throw error;
   }
@@ -958,16 +958,16 @@ export async function playNow(itemId) {
     const storedUserId = getStoredUserId() || self.userId;
 
     let item = await fetchItemDetails(itemId);
-    if (!item) throw new Error("Öğe bulunamadı");
+    if (!item) throw new Error("Item not found");
     if (item.Type === "Series") {
       const best = await getBestEpisodeIdForSeries(item.Id, self.userId);
-      if (!best) throw new Error("Bölüm bulunamadı");
+      if (!best) throw new Error("Episode not found");
       itemId = best;
       item = await fetchItemDetails(itemId);
     }
     if (item.Type === "Season") {
       const best = await getBestEpisodeIdForSeason(item.Id, item.SeriesId, self.userId);
-      if (!best) throw new Error("Bu sezonda hiç bölüm yok!");
+      if (!best) throw new Error("No episodes in this season!");
       itemId = best;
       item = await fetchItemDetails(itemId);
     }
@@ -978,7 +978,7 @@ export async function playNow(itemId) {
     );
 
     if (!videoClients.length) {
-      throw new Error("Video oynatıcı bulunamadı. Lütfen bir TV/telefon uygulaması açın.");
+      throw new Error("Video player not found. Please open a TV/phone app.");
     }
     const storedApiDevId = getStoredDeviceId();
     let target = null;
@@ -1008,11 +1008,11 @@ export async function playNow(itemId) {
     }
 
     if (!target) {
-      throw new Error("Uygun oynatıcı cihaz bulunamadı");
+      throw new Error("No suitable player device found");
     }
 
     if (target.UserId && target.UserId !== storedUserId) {
-      console.warn("Hedef cihaz farklı kullanıcıya ait, yine de denenecek");
+      console.warn("Target device belongs to a different user, will try anyway");
     }
     const userItemData = await makeApiRequest(`/Users/${self.userId}/Items/${itemId}`);
     const resumeTicks = userItemData?.UserData?.PlaybackPositionTicks || 0;
@@ -1029,17 +1029,17 @@ export async function playNow(itemId) {
 
     if (!res.ok) {
       const errorText = await res.text().catch(() => '');
-      throw new Error(`Oynatma komutu başarısız: ${res.status} ${errorText}`);
+      throw new Error(`Playback command failed: ${res.status} ${errorText}`);
     }
 
     window.currentPlayingItemId = itemId;
     if (target.DeviceName) {
-      console.log(`Oynatma komutu gönderildi: ${target.DeviceName}`);
+      console.log(`Play command sent: ${target.DeviceName}`);
     }
     return true;
   } catch (err) {
-    console.error("Oynatma hatası:", err);
-    const errorMsg = err.message || "Oynatma sırasında bir hata oluştu";
+    console.error("Playback error:", err);
+    const errorMsg = err.message || "An error occurred during playback";
     if (typeof window.showMessage === 'function') {
       window.showMessage(errorMsg, 'error');
     }
@@ -1059,7 +1059,7 @@ async function getRandomEpisodeId(seriesId) {
     : [];
 
   if (!allEpisodes.length) {
-    throw new Error("Bölüm bulunamadı");
+    throw new Error("Episode not found");
   }
   const randomIndex = Math.floor(Math.random() * allEpisodes.length);
   return allEpisodes[randomIndex].Id;
@@ -1116,7 +1116,7 @@ if (item.Type === "Series") {
 
     if (item.Type === "Season") {
       const episodes = await makeApiRequest(`/Shows/${item.SeriesId}/Episodes?SeasonId=${itemId}&Fields=Id`);
-      if (!episodes?.Items?.length) throw new Error("Bu sezonda hiç bölüm yok!");
+      if (!episodes?.Items?.length) throw new Error("No episodes in this season!");
       const episode = episodes.Items[Math.floor(Math.random() * episodes.Items.length)];
       itemId = episode.Id;
       item = await fetchItemDetails(itemId);
@@ -1140,7 +1140,7 @@ if (item.Type === "Series") {
 
       const source = playbackInfo?.MediaSources?.[0];
       if (!source) {
-        console.error("Medya kaynağı bulunamadı (müzik)");
+        console.error("Media source not found (music)");
         return null;
       }
 
@@ -1197,7 +1197,7 @@ if (item.Type === "Series") {
 
     const videoSource = playbackInfo?.MediaSources?.[0];
     if (!videoSource) {
-      console.error("Medya kaynağı bulunamadı");
+      console.error("Media source not found");
       return null;
     }
 
@@ -1277,7 +1277,7 @@ if (item.Type === "Series") {
     return `/Videos/${itemId}/stream.${container}?${buildQueryParams(streamParams)}`;
 
   } catch (error) {
-    console.error("Stream URL oluşturma hatası:", error);
+    console.error("Stream URL generation error:", error);
     return null;
   }
 }
@@ -1303,7 +1303,7 @@ export async function getIntroVideoUrl(itemId) {
     }
     return null;
   } catch (error) {
-    console.error("Intro video alınırken hata:", error);
+    console.error("Error fetching intro video:", error);
     return null;
   }
 }
@@ -1392,7 +1392,7 @@ export async function getUserTopGenres(limit = 5, itemType = null) {
 
     return result;
   } catch (error) {
-    console.error("❌ getUserTopGenres hatası:", error);
+    console.error("❌ getUserTopGenres error:", error);
     return ['Action', 'Drama', 'Comedy', 'Sci-Fi', 'Adventure'].slice(0, limit);
   }
 }
@@ -1425,7 +1425,7 @@ function extractGenresFromItems(items) {
         }
       });
     } else {
-      console.warn(`ℹ️ Tür bilgisi okunamadı → ID: ${item.Id} | Ad: ${item.Name || 'İsimsiz'}`);
+      console.warn(`ℹ️ Genre info not read → ID: ${item.Id} | Name: ${item.Name || 'Unnamed'}`);
     }
   });
 
@@ -1448,7 +1448,7 @@ function checkAndClearCacheOnUserChange(cacheKey, currentUserId) {
     try {
       const cached = JSON.parse(cachedRaw);
       if (cached.userId && cached.userId !== currentUserId) {
-        console.log("👤 Kullanıcı değişti, cache temizleniyor:", cacheKey);
+        console.log("👤 User changed, clearing cache:", cacheKey);
         localStorage.removeItem(cacheKey);
       }
     } catch {
@@ -1482,7 +1482,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('pagehide', clearAllInMemoryCaches, { once: true });
   window.addEventListener('storage', (e) => {
     if (["json-credentials", "embyToken", "serverId"].includes(e.key)) {
-      console.log("🗝️ Storage değişti → cache temizleniyor");
+      console.log("🗝️ Storage changed → clearing cache");
       nukeAllCachesAndLocalUserCaches();
       __lastAuthSnapshot = null;
       if (e.key === "json-credentials" && (e.newValue === null || e.newValue === undefined)) {
@@ -1520,7 +1520,7 @@ export async function getCachedUserTopGenres(limit = 50, itemType = null) {
     return genres;
 
   } catch (error) {
-    console.error("Tür bilgisi cache alınırken hata:", error);
+    console.error("Error retrieving genre info cache:", error);
     return getUserTopGenres(limit, itemType);
   }
 }

@@ -82,7 +82,7 @@ export async function cacheForOffline(trackId, type, data) {
     }
     touch(id);
   } catch (err) {
-    console.error("Önbellekleme hatası:", err);
+    console.error("Caching error:", err);
   }
 }
 
@@ -106,7 +106,7 @@ export async function getFromOfflineCache(trackId, type) {
     if (type === "artwork" && rec.artwork != null) return rec.artwork;
     return null;
   } catch (err) {
-    console.error("Önbellekten okuma hatası:", err);
+    console.error("Error reading from cache:", err);
     return null;
   }
 }

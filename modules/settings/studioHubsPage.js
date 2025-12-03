@@ -332,7 +332,7 @@ export function createStudioHubsPanel(config, labels) {
         hidden.value = JSON.stringify(names);
       }
     } catch (e) {
-      console.warn("studioHubsPage: Studios genişletme başarısız:", e);
+      console.warn("studioHubsPage: Studios expansion failed:", e);
     }
   })();
 
@@ -445,7 +445,7 @@ placeGenreUnderStudio.addEventListener('change', syncGenreAbovePersonalState, { 
         genreHidden.value = JSON.stringify(names);
       }
     } catch (e) {
-      console.warn("Tür listesi ayarlara eklenemedi:", e);
+      console.warn("Could not add genre list to settings:", e);
     }
   })();
 
@@ -520,7 +520,7 @@ async function fetchGenresForSettings(ctrl) {
     }
     return uniqueCaseInsensitive(names);
   } catch (e) {
-    console.warn("fetchGenresForSettings hatası:", e);
+    console.warn("fetchGenresForSettings error:", e);
     return [];
   }
 }

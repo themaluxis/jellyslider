@@ -150,7 +150,7 @@ export function loadUserSettings() {
       updateRepeatButtonUI();
 
     } catch (e) {
-      console.error("Ayarlar yüklenirken hata:", e);
+      console.error("Error loading settings:", e);
     }
   }
   saveUserSettings();
@@ -199,7 +199,7 @@ export function saveUserSettings() {
   try {
     localStorage.setItem("musicPlayerSettings", JSON.stringify(musicPlayerState.userSettings));
   } catch (e) {
-    console.error("Ayarlar kaydedilirken hata:", e);
+    console.error("Error saving settings:", e);
   }
 }
 

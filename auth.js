@@ -30,9 +30,9 @@ export function saveCredentials(credentials) {
       localStorage.setItem("serverId", serverId);
     }
 
-    console.log("Kimlik bilgileri kaydedildi.");
+    console.log("Credentials saved.");
   } catch (err) {
-    console.error("Kimlik bilgileri kaydedilirken hata:", err);
+    console.error("Error saving credentials:", err);
   }
 }
 
@@ -94,9 +94,9 @@ export function saveApiKey(apiKey) {
       }
     } catch {}
 
-    console.log("API anahtarı kaydedildi.");
+    console.log("API key saved.");
   } catch (err) {
-    console.error("API anahtarı kaydedilirken hata:", err);
+    console.error("Error saving API key:", err);
   }
 }
 
@@ -106,7 +106,7 @@ function clearCredentials() {
     sessionStorage.removeItem(k);
     localStorage.removeItem(k);
   });
-  console.log("Tüm kimlik bilgileri temizlendi.");
+  console.log("All credentials cleared.");
 }
 
 export function getAuthToken() {

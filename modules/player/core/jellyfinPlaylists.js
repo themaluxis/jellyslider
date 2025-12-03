@@ -33,7 +33,7 @@ export async function fetchJellyfinPlaylists() {
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP hata durumu: ${response.status}`);
+      throw new Error(`HTTP error status: ${response.status}`);
     }
 
     const data = await response.json();
@@ -44,7 +44,7 @@ export async function fetchJellyfinPlaylists() {
       imageTag: item.ImageTags?.Primary || null
     }));
   } catch (error) {
-    console.error("Çalma listesi getirme hatası:", error);
+    console.error("Playlist fetch error:", error);
     showNotification(
       `<i class="fas fa-regular fa-hexagon-exclamation"></i> ${config.languageLabels.playlistFetchError}`,
       2000,
@@ -144,7 +144,7 @@ export async function playJellyfinPlaylist(playlistId) {
 
     playTrack(0);
   } catch (error) {
-    console.error("Çalma listesi oynatma hatası:", error);
+    console.error("Playlist playback error:", error);
     showNotification(
       `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels.playlistPlayError}`,
       2000,

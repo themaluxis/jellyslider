@@ -385,7 +385,7 @@ function schedulePersonalRecsReinit(delayMs = 10000) {
         renderPersonalRecommendations();
       }
     } catch (e) {
-      console.warn("schedulePersonalRecsReinit hata:", e);
+      console.warn("schedulePersonalRecsReinit error:", e);
     }
   }, Math.max(0, delayMs|0));
 }
@@ -475,7 +475,7 @@ export async function loadHls() {
     const script = document.createElement("script");
     script.src = `/slider/modules/hlsjs/hls.min.js`;
     script.onload = resolve;
-    script.onerror = () => reject(new Error("hls yüklenemedi"));
+    script.onerror = () => reject(new Error("hls could not be loaded"));
     document.head.appendChild(script);
   });
 }
@@ -898,7 +898,7 @@ export async function slidesInit() {
       userId = s.userId;
       accessToken = s.accessToken;
     } catch (e) {
-   console.error("Oturum bilgisi okunamadı:", e);
+   console.error("Session info could not be read:", e);
    return;
  }
 
@@ -927,10 +927,10 @@ export async function slidesInit() {
           if (text.length >= 10) {
             listItems = text.split("\n").map((l) => l.trim()).filter(Boolean);
           } else {
-            console.warn("list.txt çok küçük, fallback API devrede.");
+            console.warn("list.txt is too small, fallback API activated.");
           }
         } else {
-          console.warn("list.txt alınamadı, fallback API devrede.");
+          console.warn("list.txt could not be retrieved, fallback API activated.");
         }
       }
 
@@ -974,7 +974,7 @@ export async function slidesInit() {
               playingItems = fetchedItems.slice(0, playingLimit);
             }
           } catch (err) {
-            console.error("İzlenen içerikler alınırken hata:", err);
+            console.error("Error fetching watched content:", err);
           }
         }
 
@@ -1001,7 +1001,7 @@ export async function slidesInit() {
                 }
                 return seasonData;
               } catch (error) {
-                console.error("Season detay alınırken hata:", error);
+                console.error("Error fetching season details:", error);
                 return item;
               }
             })
@@ -1116,9 +1116,9 @@ export async function slidesInit() {
   const newHistory = Array.from(new Set([...history, ...pickedIds])).slice(-shuffleSeedLimit);
   try {
     saveShuffleHistory(userId, newHistory);
-    console.debug("[JMS] shuffle history kaydedildi:", userId, newHistory.length);
+    console.debug("[JMS] shuffle history saved:", userId, newHistory.length);
   } catch (e) {
-    console.warn("[JMS] shuffle history kaydedilemedi:", e);
+    console.warn("[JMS] shuffle history could not be saved:", e);
   }
   window.__shuffleSavedThisLoad = true;
 }
@@ -1151,12 +1151,12 @@ export async function slidesInit() {
         items = detailed.filter((x) => x);
       }
     } catch (err) {
-      console.error("Slide verisi hazırlanırken hata:", err);
+      console.error("Error preparing slide data:", err);
     }
 
     try { primeQualityFromItems(items); } catch {}
     if (!items.length) {
-    console.warn("Hiçbir slayt verisi elde edilemedi.");
+    console.warn("No slide data obtained.");
     return;
   }
   window.__totalSlidesPlanned = items.length;
@@ -1199,17 +1199,17 @@ export async function slidesInit() {
               }
             }
           } catch (e) {
-            console.warn("Arka plan slayt oluşturma hatası:", e);
+            console.warn("Background slide creation error:", e);
           }
         }
         try {
         } catch (e) {
-          console.warn("Dot navigation yeniden kurulamadı:", e);
+          console.warn("Dot navigation could not be re-established:", e);
         }
       })();
     });
   } catch (e) {
-    console.error("slidesInit hata:", e);
+    console.error("slidesInit error:", e);
   } finally {
     window.sliderResetInProgress = false;
     window.__slidesInitRunning = false;
@@ -1369,11 +1369,11 @@ if (window.__totalSlidesPlanned > 0 && window.__slidesCreated >= window.__totalS
       scheduleSliderRebuild("cycle-expired-and-last-finished");
     }
   } catch (e) {
-    console.warn("per-slide-complete handler hata:", e);
+    console.warn("per-slide-complete handler error:", e);
   }
 }, true);
 } catch (e) {
-    console.error("initializeSlider hata:", e);
+    console.error("initializeSlider error:", e);
   } finally {
     window.sliderResetInProgress = false;
   }
@@ -1619,7 +1619,7 @@ function observeWhenHomeReady(cb, maxMs = 20000) {
     setupNavigationObserver();
     idle(() => { if (config.enableStudioHubs) ensureStudioHubsMounted(); });
   } catch (e) {
-    console.warn("robustBoot (fast) hata:", e);
+    console.warn("robustBoot (fast) error:", e);
   }
 })();
 
@@ -1640,7 +1640,7 @@ window.addEventListener("pageshow", () => {
 
 window.addEventListener("unhandledrejection", (event) => {
   if (event?.reason?.message && event.reason.message.includes("quality badge")) {
-    console.warn("Kalite badge hatası:", event.reason);
+    console.warn("Quality badge error:", event.reason);
     event.preventDefault();
   }
 });
