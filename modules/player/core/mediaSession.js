@@ -9,7 +9,7 @@ let mediaBag = null;
 
 export function initMediaSession() {
   if (!("mediaSession" in navigator)) {
-    console.warn("MediaSession API desteklenmiyor");
+    console.warn("MediaSession API not supported");
     return;
   }
 
@@ -130,7 +130,7 @@ export async function updateMediaMetadata(track) {
     navigator.mediaSession.metadata = new MediaMetadata(metadata);
     updatePlaybackState();
   } catch (error) {
-    console.error("[MediaSession] Metadata güncelleme başarısız:", error);
+    console.error("[MediaSession] Metadata update failed:", error);
   }
 }
 

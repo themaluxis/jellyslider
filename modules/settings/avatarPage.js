@@ -409,7 +409,7 @@ commonElements.forEach(el => el.style.display = 'flex');
   function updateDicebearParamsSection() {
     const styleSelect = document.querySelector('#dicebearStyle');
     if (!styleSelect) {
-      console.error('Dicebear stil seçim öğesi bulunamadı');
+      console.error('Dicebear style selector not found');
       return;
     }
 
@@ -539,7 +539,7 @@ export async function applyDicebearAvatar() {
   try {
     const params = collectDicebearParams();
     if (!saveDicebearParams(params)) {
-      throw new Error('Parametreler kaydedilemedi');
+      throw new Error('Parameters could not be saved');
     }
 
     const headerButton = document.querySelector('button.headerUserButton');
@@ -556,7 +556,7 @@ export async function applyDicebearAvatar() {
     await updateHeaderUserAvatar();
     return true;
   } catch (error) {
-    console.error('Avatar uygulanırken hata:', error);
+    console.error('Error applying avatar:', error);
     throw error;
   }
 }
@@ -567,26 +567,26 @@ function saveDicebearParams(params) {
     const paramsToSave = params || collectDicebearParams();
 
     if (!paramsToSave || typeof paramsToSave !== 'object') {
-      console.error('Geçersiz parametreler:', paramsToSave);
+      console.error('Invalid parameters:', paramsToSave);
       return false;
     }
 
     const jsonString = JSON.stringify(paramsToSave);
     if (!jsonString || jsonString === '{}') {
-      console.warn('Boş parametreler kaydedilmeye çalışılıyor');
+      console.warn('Attempting to save empty parameters');
       return false;
     }
 
     localStorage.setItem('dicebearParams', jsonString);
     const saved = localStorage.getItem('dicebearParams');
     if (saved !== jsonString) {
-      console.error('Kayıt başarısız oldu!');
+      console.error('Save failed!');
       return false;
     }
 
     return true;
   } catch (e) {
-    console.error('Dicebear parametreleri kaydedilirken hata oluştu:', e);
+    console.error('Error saving Dicebear parameters:', e);
     localStorage.removeItem('dicebearParams');
     return false;
   }
@@ -598,7 +598,7 @@ function getDicebearParams() {
     const params = localStorage.getItem('dicebearParams');
     return params ? JSON.parse(params) : {};
   } catch (e) {
-    console.error('Dicebear ayarları yüklenirken hata oluştu:', e);
+    console.error('Error loading Dicebear settings:', e);
     return {};
   }
 }
@@ -639,10 +639,10 @@ function attachDicebearParamsListeners(container) {
 
       if (params && typeof params === 'object' && !Array.isArray(params)) {
         if (!saveDicebearParams(params)) {
-          console.error('Parametreler kaydedilemedi!');
+          console.error('Parameters could not be saved!');
         }
       } else {
-        console.error('Geçersiz parametre formatı:', params);
+        console.error('Invalid parameter format:', params);
       }
 
       clearAvatarCache();

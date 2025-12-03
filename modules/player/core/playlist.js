@@ -46,7 +46,7 @@ export async function refreshPlaylist() {
       }
     } catch (e) {
       if (e.name === "AbortError") return;
-      console.error("Toplam parça sayısı alınırken hata:", e);
+      console.error("Error retrieving total track count:", e);
     }
 
     const effectiveLimit = totalItems > 0
@@ -205,7 +205,7 @@ export async function refreshPlaylist() {
     if (err.name === "AbortError") {
       return;
     }
-    console.error("Liste yenilenirken hata:", err);
+    console.error("Error refreshing list:", err);
     if (musicPlayerState.modernTitleEl) musicPlayerState.modernTitleEl.textContent = config.languageLabels.errorOccurred;
     if (musicPlayerState.modernArtistEl) {
       musicPlayerState.modernArtistEl.textContent = err.message?.includes("abort")
@@ -268,7 +268,7 @@ async function addItemsToPlaylist(playlistId, itemIds, userId) {
       throw new Error(config.languageLabels.serverError.replace("{0}", response.status));
     }
   } catch (error) {
-    console.error("Çalma listesine parça eklenirken hata:", error);
+    console.error("Error adding item to playlist:", error);
     throw error;
   }
 }
@@ -288,8 +288,8 @@ export async function removeItemsFromPlaylist(playlistId, itemIds) {
 
   if (!res.ok) {
     const details = await res.text().catch(() => "");
-    console.error("removeItemsFromPlaylist hata detayı:", details);
-    throw new Error(`Silme işlemi başarısız: HTTP ${res.status}${details ? ` – ${details}` : ""}`);
+    console.error("removeItemsFromPlaylist error details:", details);
+    throw new Error(`Delete failed: HTTP ${res.status}${details ? ` – ${details}` : ""}`);
   }
 
   return { success: true };
@@ -305,7 +305,7 @@ async function getPlaylistItems(playlistId) {
   });
 
   if (!response.ok) {
-    throw new Error("Çalma listesi öğeleri alınamadı");
+    throw new Error("Could not retrieve playlist items");
   }
 
   const data = await response.json();
@@ -326,7 +326,7 @@ export async function saveCurrentPlaylistToJellyfin(
       3000,
       "error"
     );
-    throw new Error("API anahtarı bulunamadı");
+    throw new Error("API key not found");
   }
 
   if (!Array.isArray(tracksToSave) || tracksToSave.length === 0) {
@@ -419,7 +419,7 @@ export async function saveCurrentPlaylistToJellyfin(
       return result;
     }
   } catch (err) {
-    console.error("Çalma listesi işlemi başarısız:", err);
+    console.error("Playlist operation failed:", err);
     showNotification(
       `<i class="fas fa-exclamation-triangle"></i> ${err.message} ${config.languageLabels.playlistSaveError}`,
       3000,

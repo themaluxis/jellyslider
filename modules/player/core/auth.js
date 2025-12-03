@@ -9,7 +9,7 @@ export function saveCredentialsToSessionStorage(credentials) {
       window.serverConfig.address = credentials.Servers[0].LocalAddress;
     }
   } catch (err) {
-    console.error("Kimlik bilgileri kaydedilirken hata:", err);
+    console.error("Error saving credentials:", err);
   }
 }
 
@@ -18,7 +18,7 @@ export function saveApiKey(apiKey) {
   try {
     sessionStorage.setItem("api-key", apiKey);
   } catch (err) {
-    console.error("API anahtarı kaydedilirken hata:", err);
+    console.error("Error saving API key:", err);
   }
 }
 
@@ -65,7 +65,7 @@ export function installConsoleInterceptor() {
             const credentials = JSON.parse(jsonStr);
             saveCredentialsToSessionStorage(credentials);
           } catch (err) {
-            console.warn?.("Kimlik bilgileri ayrıştırılırken hata:", err);
+            console.warn?.("Error parsing credentials:", err);
           }
         } else if (arg.startsWith(WS_PREFIX)) {
           const urlPart = arg.split("url:")[1]?.trim();
@@ -75,7 +75,7 @@ export function installConsoleInterceptor() {
               const apiKey = u.searchParams.get("api_key");
               if (apiKey) saveApiKey(apiKey);
             } catch (err) {
-              console.warn?.("API anahtarı çıkarılırken hata:", err);
+              console.warn?.("Error extracting API key:", err);
             }
           }
         }

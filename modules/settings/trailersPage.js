@@ -35,7 +35,7 @@ async function checkUserIsAdmin() {
     const user = await window.ApiClient.getCurrentUser();
     return !!(user && user.Policy && user.Policy.IsAdministrator);
   } catch (error) {
-    console.error('Kullanıcı yetki kontrolü hatası:', error);
+    console.error('User authorization check error:', error);
     return false;
   }
 }
