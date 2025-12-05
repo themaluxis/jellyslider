@@ -232,7 +232,7 @@ async function createSlide(item) {
       Name: item.Name
     };
         } catch (err) {
-      console.error("Dizi bilgileri alınamadı:", err);
+      console.error("Failed to fetch series details:", err);
     }
   }
 
@@ -675,7 +675,7 @@ function openTrailerModal(trailerUrl, trailerName, itemName = '', itemType = '',
   logoContainer.appendChild(logoImg);
 
   const titleElement = document.createElement("h3");
-  const itemDisplayName = itemName ? itemName : 'Bilinmeyen İçerik';
+  const itemDisplayName = itemName ? itemName : 'Unknown Content';
   titleElement.textContent = `${itemDisplayName} - ${config.languageLabels.fragman}`;
   titleElement.style.margin = "0";
   titleElement.style.marginLeft = "15px";
@@ -756,7 +756,7 @@ function openTrailerModal(trailerUrl, trailerName, itemName = '', itemType = '',
       iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[50]}', '*');
       audioUnlocked = true;
     } catch (e) {
-      console.log("Ses açma hatası:", e);
+      console.log("Error unmute:", e);
     }
   };
 
@@ -794,7 +794,7 @@ function openTrailerModal(trailerUrl, trailerName, itemName = '', itemType = '',
   const contentType = itemType === 'Movie' ? config.languageLabels.film :
                     itemType === 'Series' ? config.languageLabels.dizi :
                     itemType === 'Episode' ? config.languageLabels.dizi :
-                    "İçerik: ";
+                    "Content: ";
   itemTitleElement.textContent = `${contentType}: ${itemDisplayName}`;
   itemTitleElement.style.fontWeight = "bold";
   infoContainer.appendChild(itemTitleElement);
@@ -910,7 +910,7 @@ function openTrailerModal(trailerUrl, trailerName, itemName = '', itemType = '',
         favoriteIcon.style.transform = "scale(1.2)";
         setTimeout(() => (favoriteIcon.style.transform = ""), 200);
       } catch (err) {
-        console.error("Favori durumu güncellenirken hata:", err);
+        console.error("Error updating favorite status:", err);
       }
     });
 

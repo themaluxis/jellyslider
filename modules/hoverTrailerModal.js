@@ -495,7 +495,7 @@ export function createVideoModal({ showButtons = true, context = 'dot' } = {}) {
     if (!itemId) { alert("Oynatma başarısız: itemId bulunamadı"); return; }
     closeVideoModal();
     try { await playNow(itemId); }
-    catch (error) { console.error("Oynatma hatası:", error); alert("Oynatma başarısız: " + error.message); }
+    catch (error) { console.error("Playback error:", error); alert("Playback failed: " + error.message); }
     finally { closeVideoModal(); }
   });
 
@@ -518,7 +518,7 @@ export function createVideoModal({ showButtons = true, context = 'dot' } = {}) {
         slide.dataset.played = isPlayed.toString();
       }
     } catch (error) {
-      console.error("Favori durumu güncelleme hatası:", error);
+      console.error("Favorite status update error:", error);
     }
   });
 
@@ -566,7 +566,7 @@ export function createVideoModal({ showButtons = true, context = 'dot' } = {}) {
           volumeButton.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
         }
       } catch (err) {
-        console.error('Player ses kontrol hatası:', err);
+        console.error('Player volume control error:', err);
         toggleYouTubeVolumeManual(trailerIframe, volumeButton);
       }
       return;
@@ -666,7 +666,7 @@ export function createVideoModal({ showButtons = true, context = 'dot' } = {}) {
       const startAt = 10 * 60;
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         hls.startLoad(startAt);
-        Promise.resolve(video.play()).catch(e => { if (e.name !== 'AbortError') console.warn('Video oynatma hatası:', e); });
+        Promise.resolve(video.play()).catch(e => { if (e.name !== 'AbortError') console.warn('Video playback error:', e); });
       });
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
@@ -687,7 +687,7 @@ export function createVideoModal({ showButtons = true, context = 'dot' } = {}) {
       video.src = url;
       video.addEventListener('loadedmetadata', () => {
         video.currentTime = 10 * 60;
-        Promise.resolve(video.play()).catch(e => { if (e.name !== 'AbortError') console.warn('Video oynatma hatası:', e); });
+        Promise.resolve(video.play()).catch(e => { if (e.name !== 'AbortError') console.warn('Video playback error:', e); });
       }, { once: true });
     }
   };
@@ -1754,7 +1754,7 @@ function ensureYTAPI() {
         modalState._ytApiLoading = false;
         resolve();
       } else {
-        console.warn('YouTube API zaman aşımına uğradı, API olmadan devam ediyor');
+        console.warn('YouTube API timed out, proceeding without API');
         modalState._ytApiReady = false;
         modalState._ytApiLoading = false;
         resolve();
@@ -2579,7 +2579,7 @@ export function setupHoverForAllItems() {
           await updateModalContent(itemDetails, videoUrl);
         } catch (error) {
           if (error.name !== 'AbortError') {
-            console.error('Öğe hover hatası:', error);
+            console.error('Item hover error:', error);
             if (modalState.videoModal) modalState.videoModal.style.display = 'none';
           }
         }
@@ -2982,7 +2982,7 @@ export async function openPreviewModalForItem(itemId, anchorEl, opts = {}) {
     const hasPlayable = hasIframe || hasVideo;
     if (!hasPlayable) closeVideoModal();
   } catch (e) {
-    console.error('openPreviewModalForItem hatası:', e);
+    console.error('openPreviewModalForItem error:', e);
   }
 }
 

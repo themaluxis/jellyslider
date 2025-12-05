@@ -884,7 +884,7 @@ export function updateConfig(updatedConfig) {
         localStorage.removeItem(key);
       }
     } catch (e) {
-      console.warn('Config yazılamadı:', key, e);
+      console.warn('Config could not be written:', key, e);
     }
   });
 

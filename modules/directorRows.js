@@ -791,7 +791,7 @@ async function fetchItemsByDirector(userId, directorId, limit=EFFECTIVE_ROW_CARD
     const items = Array.isArray(data?.Items) ? data.Items : [];
     return filterAndTrimByRating(items, MIN_RATING, EFFECTIVE_ROW_CARD_COUNT);
   } catch (e) {
-    console.warn("directorRows: yönetmen içerik çekilemedi:", e);
+    console.warn("directorRows: could not fetch director content:", e);
     return [];
   }
 }
@@ -895,13 +895,13 @@ for (let attempt = 0; attempt < 4 && STATE.directors.length < ROWS_COUNT; attemp
 }
 
 if (STATE.directors.length < ROWS_COUNT) {
-  console.warn(`DirectorRows: sadece ${STATE.directors.length}/${ROWS_COUNT} yönetmen bulunabildi (kütüphane kısıtlı olabilir).`);
+  console.warn(`DirectorRows: only found ${STATE.directors.length}/${ROWS_COUNT} directors (library might be limited).`);
 }
 
   STATE.nextIndex = 0;
   STATE.renderedCount = 0;
 
-  console.log(`DirectorRows: ${STATE.directors.length} uygun yönetmen bulundu (>=${MIN_CONTENTS} içerik), ilk batch scroll’dan sonra başlayacak...`);
+  console.log(`DirectorRows: ${STATE.directors.length} suitable directors found (>=${MIN_CONTENTS} items), first batch will start after scroll...`);
   await waitForFirstScrollGate();
   await renderNextDirectorBatch(false);
   setupBatchSentinel();
@@ -946,7 +946,7 @@ function setupBatchSentinel() {
           STATE.nextIndex < STATE.directors.length &&
           STATE.renderedCount < STATE.maxRenderCount) {
 
-        console.log('Batch sentinel görüldü, yeni batch render ediliyor...');
+        console.log('Batch sentinel spotted, rendering new batch...');
         await renderNextDirectorBatch(false);
         setTimeout(checkAndAutoPump, 100);
       }
@@ -973,7 +973,7 @@ function checkAndAutoPump() {
       STATE.nextIndex < STATE.directors.length &&
       STATE.renderedCount < STATE.maxRenderCount) {
 
-    console.log('Auto-pump tetiklendi...');
+    console.log('Auto-pump triggered...');
     renderNextDirectorBatch(false).then(() => {
       setTimeout(checkAndAutoPump, 150);
     });
@@ -986,7 +986,7 @@ async function renderNextDirectorBatch(immediateLoadForThisBatch = false) {
   }
 
   if (STATE.nextIndex >= STATE.directors.length) {
-    console.log('Tüm yönetmenler render edildi.');
+    console.log('All directors rendered.');
     if (STATE.batchObserver) {
       STATE.batchObserver.disconnect();
     }
@@ -998,7 +998,7 @@ async function renderNextDirectorBatch(immediateLoadForThisBatch = false) {
   const end = Math.min(STATE.nextIndex + STATE.batchSize, STATE.directors.length);
   const slice = STATE.directors.slice(STATE.nextIndex, end);
 
-  console.log(`Render batch: ${STATE.nextIndex}-${end} (${slice.length} yönetmen)`);
+  console.log(`Render batch: ${STATE.nextIndex}-${end} (${slice.length} directors)`);
 
   for (let idx = 0; idx < slice.length; idx++) {
     if (STATE.renderedCount >= STATE.maxRenderCount) break;
@@ -1011,7 +1011,7 @@ async function renderNextDirectorBatch(immediateLoadForThisBatch = false) {
   STATE.nextIndex = end;
   STATE.loading = false;
 
-  console.log(`Render tamamlandı. Toplam: ${STATE.renderedCount}/${STATE.directors.length} yönetmen`);
+  console.log(`Render complete. Total: ${STATE.renderedCount}/${STATE.directors.length} directors`);
 }
 
 function getDirectorUrl(directorId, directorName, serverId) {
@@ -1059,7 +1059,7 @@ function renderDirectorSection(dir, immediateLoad = false) {
       try {
         openDirectorExplorer({ Id: dir.Id, Name: dir.Name });
       } catch (err) {
-        console.error('Director explorer açılırken hata:', err);
+        console.error('Error opening director explorer:', err);
       }
     };
     titleBtn.addEventListener('click', open, { passive: false });
@@ -1075,7 +1075,7 @@ function renderDirectorSection(dir, immediateLoad = false) {
       try {
         openDirectorExplorer({ Id: dir.Id, Name: dir.Name });
       } catch (err) {
-        console.error('Director explorer açılırken hata:', err);
+        console.error('Error opening director explorer:', err);
       }
     }, { passive: false });
   }
@@ -1119,7 +1119,7 @@ function renderDirectorSection(dir, immediateLoad = false) {
         if (ent.isIntersecting) {
           obs.disconnect();
           STATE.sectionIOs.delete(obs);
-          console.log(`Yönetmen section görüldü: ${dir.Name}`);
+          console.log(`Director section spotted: ${dir.Name}`);
           startFilling();
           break;
         }
@@ -1183,8 +1183,8 @@ function fillRowWhenReady(row, dir){
         setTimeout(pumpMore, 200);
       }
     } catch (error) {
-      console.error('Yönetmen içerik yükleme hatası:', error);
-      row.innerHTML = `<div class="no-recommendations">Yüklenemedi</div>`;
+      console.error('Error loading director content:', error);
+      row.innerHTML = `<div class="no-recommendations">Could not load</div>`;
       setupScroller(row);
     }
   })();

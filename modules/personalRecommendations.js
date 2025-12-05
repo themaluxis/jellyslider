@@ -469,7 +469,7 @@ export async function renderPersonalRecommendations() {
     await Promise.allSettled(jobs);
     try { enforceOrder(getHomeSectionsContainer(indexPage)); } catch {}
   } catch (error) {
-    console.error("Kişisel öneriler / tür hub render hatası:", error);
+    console.error("Personal recommendations / genre hub render error:", error);
   } finally {
     try { delete document.documentElement.dataset.jmsSoftBlock; } catch {}
     __personalRecsBusy = false;
@@ -640,7 +640,7 @@ async function fetchUnwatchedByGenres(userId, genres, targetCount = 20, minRatin
     const items = Array.isArray(data?.Items) ? data.Items : [];
     return filterAndTrimByRating(items, minRating, targetCount);
   } catch (err) {
-    console.error("Türe göre içerik alınırken hata:", err);
+    console.error("Error retrieving content by genre:", err);
     const fb = await getFallbackRecommendations(userId, requested);
     return filterAndTrimByRating(fb, minRating, targetCount);
   }
@@ -658,7 +658,7 @@ async function getFallbackRecommendations(userId, limit = 20) {
     const data = await makeApiRequest(url);
     return Array.isArray(data?.Items) ? data.Items : [];
   } catch (err) {
-    console.error("Fallback öneriler alınırken hata:", err);
+    console.error("Error retrieving fallback recommendations:", err);
     return [];
   }
 }

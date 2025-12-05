@@ -262,7 +262,7 @@ export function createDotNavigation() {
 
   const slidesContainer = indexPage.querySelector("#slides-container");
   if (!slidesContainer) {
-    console.warn("Slayt konteynırı bulunamadı, nokta navigasyonu oluşturulamıyor");
+    console.warn("Slide container not found, cannot create dot navigation");
     return;
   }
 
@@ -291,7 +291,7 @@ export function createDotNavigation() {
     const dotElements = slidesArray.map((slide, index) => {
     const itemId = slide.dataset.itemId;
     if (!itemId) {
-        console.warn(`Dot oluşturulamadı: slide ${index} için itemId eksik`);
+        console.warn(`Dot creation failed: itemId missing for slide ${index}`);
         return null;
     }
 
@@ -327,7 +327,7 @@ export function createDotNavigation() {
             }
         }
     } catch (e) {
-        console.warn("Video kalite bilgisi yüklenirken hata:", e);
+        console.warn("Error loading video quality info:", e);
     }
 
         const positionTicks = Number(slide.dataset.playbackpositionticks);
@@ -374,8 +374,8 @@ export function createDotNavigation() {
       try {
         await playNow(itemId);
       } catch (error) {
-        console.error("Oynatma hatası:", error);
-        alert("Oynatma başarısız: " + error.message);
+        console.error("Playback error:", error);
+        alert("Playback failed: " + error.message);
       } finally {
         closeVideoModal();
       }
@@ -440,7 +440,7 @@ export function createDotNavigation() {
       dot.dataset.played   = isPlayed.toString();
     } catch (error) {
       if (error?.name !== 'AbortError') {
-        console.error('Poster dot hover hatası:', error);
+        console.error('Poster dot hover error:', error);
         if (modalState.videoModal) modalState.videoModal.style.display = 'none';
       }
     }
@@ -508,7 +508,7 @@ export function createDotNavigation() {
             dot.dataset.played = isPlayed.toString();
 
         } catch (error) {
-            console.error(`Dot verileri yüklenirken hata (${dot.dataset.itemId}):`, error);
+            console.error(`Error loading dot data (${dot.dataset.itemId}):`, error);
         }
     }
 }, 0);

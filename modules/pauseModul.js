@@ -1093,7 +1093,7 @@ window.addEventListener('popstate', _onRouteHint, { signal });
       labels.descriptorTagMap = autoMap;
     } catch (e) {
       if (!(e?.status === 0 || e?.status === 401 || e?.status === 403 || e?.isAbort)) {
-        console.warn("descriptor tag map init hata:", e);
+        console.warn("descriptor tag map init error:", e);
       }
     }
   }
@@ -1699,7 +1699,7 @@ function hideOverlay(opts = {}) {
       }
       renderRecommendations(recs);
     } catch (e) {
-      console.warn("duraklatma ekranı tavsiye hatası:", e);
+      console.warn("Pause screen recommendation error:", e);
       _setRecoHeaderAndBadge(Boolean(ep));
       renderRecommendations([]);
     }
@@ -2212,7 +2212,7 @@ function findAnyVideoAnywhere(maxDepth) {
 
         video.play();
       } catch (e) {
-        console.warn("smartAutoPause auto-resume hata:", e);
+        console.warn("smartAutoPause auto-resume error:", e);
       }
     }
 

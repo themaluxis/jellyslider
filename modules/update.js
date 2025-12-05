@@ -130,7 +130,7 @@ export function startUpdatePolling(options = {}) {
         }
       }
     } catch (e) {
-      console.warn("güncelleme denetim hatası", e);
+      console.warn("update check error", e);
     }
   };
 
