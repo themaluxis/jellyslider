@@ -35,7 +35,7 @@ const CACHE_DURATION = 5 * 60 * 1000;
 async function updateLyricsDatabase() {
   if (lyricsUpdateInProgress) {
     showNotification(
-      `<i class="fas fa-circle-notch fa-spin"></i> ${config.languageLabels?.fetchLyricsRunning || "Şarkı sözleri zaten güncelleniyor..."}`,
+      `<i class="fas fa-circle-notch fa-spin"></i> ${config.languageLabels?.fetchLyricsRunning || "Lyrics update in progress..."}`,
       2000,
       "info"
     );
@@ -56,7 +56,7 @@ async function updateLyricsDatabase() {
     cancelLyricsBtn.innerHTML = '<i class="fas fa-stop"></i>';
     cancelLyricsBtn.style.display = 'inline-flex';
   }
-  showLyricsProgress(0, config.languageLabels?.starting || "Başlatılıyor...");
+  showLyricsProgress(0, config.languageLabels?.starting || "Starting...");
 
   try {
     const tracks = await musicDB.getAllTracks();
@@ -90,24 +90,24 @@ async function updateLyricsDatabase() {
           await musicDB.saveLyrics(track.Id, lyrics);
           updatedCount++;
         } catch (err) {
-          console.warn(`Şarkı sözü kaydedilemedi (${track?.Name || track?.Id}):`, err);
+          console.warn(`Lyrics could not be saved (${track?.Name || track?.Id}):`, err);
         }
       }
       const pct = Math.floor(((i + 1) / total) * 100);
-      const label = `${config.languageLabels?.processing || "İşleniyor"}: ${i + 1}/${total}`;
+      const label = `${config.languageLabels?.processing || "Processing"}: ${i + 1}/${total}`;
       showLyricsProgress(pct, label);
     }
     musicPlayerState.playlist = originalPlaylist;
     musicPlayerState.currentIndex = originalIndex;
     if (lyricsCancelRequested) {
       showNotification(
-        `<i class="fas fa-circle-pause"></i> ${config.languageLabels?.fetchLyricsCancelled || "İşlem iptal edildi"} (${config.languageLabels?.saved || "kaydedilen"}: ${await musicDB.getLyricsCount?.() ?? updatedCount})`,
+        `<i class="fas fa-circle-pause"></i> ${config.languageLabels?.fetchLyricsCancelled || "Process cancelled"} (${config.languageLabels?.saved || "saved"}: ${await musicDB.getLyricsCount?.() ?? updatedCount})`,
         3000,
         "warning"
       );
     } else {
       showNotification(
-        `<i class="fas fa-music"></i> ${updatedCount} ${config.languageLabels?.fetchLyrics || "şarkı sözü veri tabanına eklendi"}`,
+        `<i class="fas fa-music"></i> ${updatedCount} ${config.languageLabels?.fetchLyrics || "lyrics added to database"}`,
         3000,
         "db"
       );
@@ -115,9 +115,9 @@ async function updateLyricsDatabase() {
 
     await loadStatsIntoModal(true);
   } catch (err) {
-    console.error("Şarkı sözü güncelleme hatası:", err);
+    console.error("Lyrics update error:", err);
     showNotification(
-      `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels?.fetchLyricsError || "Şarkı sözleri veri tabanına eklenemedi"}`,
+      `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels?.fetchLyricsError || "Lyrics could not be added to database"}`,
       3000,
       "error"
     );
@@ -163,7 +163,7 @@ function buildStatsModal() {
 
   refreshBtn = document.createElement("span");
   refreshBtn.className = "modal-refresh-btn";
-  refreshBtn.title = config.languageLabels?.refreshData || "İstatistikleri Yenile";
+  refreshBtn.title = config.languageLabels?.refreshData || "Refresh Stats";
   refreshIcon = document.createElement("i");
   refreshIcon.className = "fa-solid fa-rotate";
   refreshBtn.appendChild(refreshIcon);
@@ -179,7 +179,7 @@ function buildStatsModal() {
 
   const title = document.createElement("h2");
   title.className = "modal-stats-title";
-  title.textContent = config.languageLabels?.statsTitle || "Veritabanı İstatistikleri";
+  title.textContent = config.languageLabels?.statsTitle || "Database Statistics";
 
   loadingSpinnerEl = document.createElement("div");
   loadingSpinnerEl.className = "modal-loading-spinner";
@@ -189,11 +189,11 @@ function buildStatsModal() {
   modalBodyEl.style.display = "none";
 
   const statDefs = [
-    ["stat-total-tracks", "fa-solid fa-music", config.languageLabels?.totalTracks || "Toplam Şarkı"],
-    ["stat-total-albums", "fa-solid fa-compact-disc", config.languageLabels?.totalAlbums || "Albüm Sayısı"],
-    ["stat-total-artists", "fa-solid fa-user", config.languageLabels?.totalArtists || "Sanatçı Sayısı"],
-    ["stat-db-size", "fa-solid fa-database", config.languageLabels?.databaseSize || "Veritabanı Boyutu"],
-    ["stat-total-lyrics", "fa-solid fa-align-left", config.languageLabels?.totalLyrics || "Kayıtlı Şarkı Sözü Sayısı"],
+    ["stat-total-tracks", "fa-solid fa-music", config.languageLabels?.totalTracks || "Total Tracks"],
+    ["stat-total-albums", "fa-solid fa-compact-disc", config.languageLabels?.totalAlbums || "Total Albums"],
+    ["stat-total-artists", "fa-solid fa-user", config.languageLabels?.totalArtists || "Total Artists"],
+    ["stat-db-size", "fa-solid fa-database", config.languageLabels?.databaseSize || "Database Size"],
+    ["stat-total-lyrics", "fa-solid fa-align-left", config.languageLabels?.totalLyrics || "Total Saved Lyrics"],
   ];
   statDefs.forEach(([id, icon, label]) => {
     const el = document.createElement("div");
@@ -208,14 +208,14 @@ function buildStatsModal() {
   fetchAllLyricsBtn = document.createElement("button");
   fetchAllLyricsBtn.id = "fetch-all-lyrics-btn";
   fetchAllLyricsBtn.className = "btn-icon";
-  fetchAllLyricsBtn.title = config.languageLabels?.fetchAllLyrics || "Tüm şarkı sözlerini veri tabanına ekle (bu işlem zaman alabilir)";
+  fetchAllLyricsBtn.title = config.languageLabels?.fetchAllLyrics || "Add all lyrics to database (this may take time)";
   fetchAllLyricsBtn.innerHTML = '<i class="fa-solid fa-sync"></i>';
   lyricsStat.appendChild(fetchAllLyricsBtn);
 
   cancelLyricsBtn = document.createElement("button");
   cancelLyricsBtn.id = "cancel-lyrics-btn";
   cancelLyricsBtn.className = "btn-icon";
-  cancelLyricsBtn.title = config.languageLabels?.cancel || "Durdur";
+  cancelLyricsBtn.title = config.languageLabels?.cancel || "Stop";
   cancelLyricsBtn.style.display = "none";
   cancelLyricsBtn.innerHTML = '<i class="fas fa-stop"></i>';
   lyricsStat.appendChild(cancelLyricsBtn);
@@ -234,16 +234,16 @@ function buildStatsModal() {
   lyricsProgressFill = lyricsProgressContainer.querySelector('#lyrics-progress-fill');
   lyricsProgressText = lyricsProgressContainer.querySelector('#lyrics-progress-text');
   const updatesSection = createStatSection(
-    config.languageLabels?.recentUpdates || "Son Güncellenenler",
+    config.languageLabels?.recentUpdates || "Recently Updated",
     "stat-recent-updates",
     "show-all-updates",
-    config.languageLabels?.showAllUpdates || "Tüm Güncellenenleri Göster"
+    config.languageLabels?.showAllUpdates || "Show All Updates"
   );
   const deletesSection = createStatSection(
-    config.languageLabels?.recentDeletes || "Son Silinenler",
+    config.languageLabels?.recentDeletes || "Recently Deleted",
     "stat-recent-deletes",
     "show-all-deletes",
-    config.languageLabels?.showAllDeletes || "Tüm Silinenleri Göster"
+    config.languageLabels?.showAllDeletes || "Show All Deletes"
   );
   modalBodyEl.appendChild(updatesSection);
   modalBodyEl.appendChild(deletesSection);
@@ -253,12 +253,12 @@ function buildStatsModal() {
   const backupBtn = document.createElement("button");
   backupBtn.id = "backup-db-btn";
   backupBtn.className = "btn btn-primary";
-  backupBtn.innerHTML = `<i class="fas fa-download"></i> ${config.languageLabels?.backupDatabase || "Veritabanını Yedekle"}`;
+  backupBtn.innerHTML = `<i class="fas fa-download"></i> ${config.languageLabels?.backupDatabase || "Backup Database"}`;
 
   const restoreBtn = document.createElement("button");
   restoreBtn.id = "restore-db-btn";
   restoreBtn.className = "btn btn-warning";
-  restoreBtn.innerHTML = `<i class="fas fa-upload"></i> ${config.languageLabels?.restoreDatabase || "Yedekten Geri Yükle"}`;
+  restoreBtn.innerHTML = `<i class="fas fa-upload"></i> ${config.languageLabels?.restoreDatabase || "Restore from Backup"}`;
 
   const restoreInput = document.createElement("input");
   restoreInput.type = "file";
@@ -269,7 +269,7 @@ function buildStatsModal() {
   const clearDbBtn = document.createElement("button");
   clearDbBtn.id = "clear-db-btn";
   clearDbBtn.className = "btn btn-danger";
-  clearDbBtn.innerHTML = `<i class="fa-solid fa-trash"></i> ${config.languageLabels?.clearDatabase || "Veritabanını Sil"}`;
+  clearDbBtn.innerHTML = `<i class="fa-solid fa-trash"></i> ${config.languageLabels?.clearDatabase || "Clear Database"}`;
 
   actionsDiv.append(backupBtn, restoreBtn, restoreInput, clearDbBtn);
   modalBodyEl.appendChild(actionsDiv);
@@ -352,9 +352,9 @@ function buildStatsModal() {
 
       await loadStatsIntoModal(true);
     } catch (error) {
-      console.error("Yenileme sırasında hata:", error);
+      console.error("Refresh error:", error);
       showNotification(
-        `<i class="fas fa-sync-alt"></i> ${config.languageLabels?.refreshError || "Yenileme sırasında hata oluştu"}`,
+        `<i class="fas fa-sync-alt"></i> ${config.languageLabels?.refreshError || "Error during refresh"}`,
         3000,
         "error"
       );
@@ -371,7 +371,7 @@ function buildStatsModal() {
     cancelLyricsBtn.disabled = true;
     cancelLyricsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     showNotification(
-      `<i class="fas fa-circle-pause"></i> ${config.languageLabels?.cancelling || "Durduruluyor..."}`,
+      `<i class="fas fa-circle-pause"></i> ${config.languageLabels?.cancelling || "Stopping..."}`,
       1500,
       'info'
     );
@@ -457,23 +457,23 @@ async function loadStatsIntoModal(forceRefresh = false) {
     await loadRecentItems(
       cachedStats.recentlyAdded,
       "stat-recent-updates",
-      config.languageLabels?.recentlyAdded || "Son Eklenenler",
+      config.languageLabels?.recentlyAdded || "Recently Added",
       formatTrackInfo
     );
 
     await loadRecentItems(
       cachedStats.recentlyDeleted.map((d) => d.trackData),
       "stat-recent-deletes",
-      config.languageLabels?.recentDeletes || "Son Silinenler",
+      config.languageLabels?.recentDeletes || "Recently Deleted",
       (item, index) => {
         const deletedItem = cachedStats.recentlyDeleted[index];
         return formatTrackInfo({ ...item, DateCreated: deletedItem.deletedAt });
       }
     );
   } catch (error) {
-    console.error("İstatistikler yüklenirken hata:", error);
+    console.error("Error loading stats:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.loadStatsError || "İstatistikler yüklenirken hata oluştu"}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.loadStatsError || "Error loading stats"}`,
       3000,
       "error"
     );
@@ -493,7 +493,7 @@ async function getDatabaseSize() {
     const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);
     return `${sizeInMB} MB`;
   } catch (error) {
-    console.error("DB boyutu hesaplanamadı:", error);
+    console.error("DB size could not be calculated:", error);
     return "? MB";
   }
 }
@@ -503,7 +503,7 @@ async function loadRecentItems(items, containerId, _sectionTitle, formatter) {
   container.innerHTML = "";
 
   if (!items || items.length === 0) {
-    container.innerHTML = `<div class="no-items">${config.languageLabels?.noData || "Veri yok"}</div>`;
+    container.innerHTML = `<div class="no-items">${config.languageLabels?.noData || "No data"}</div>`;
     return;
   }
 
@@ -518,7 +518,7 @@ async function loadRecentItems(items, containerId, _sectionTitle, formatter) {
 }
 
 function formatTrackInfo(track, _index) {
-  let displayDate = config.languageLabels?.unknownDate || "Bilinmeyen Tarih";
+  let displayDate = config.languageLabels?.unknownDate || "Unknown Date";
   try {
     if (track?.DateCreated) {
       const date = new Date(track.DateCreated);
@@ -541,11 +541,11 @@ function formatTrackInfo(track, _index) {
 
   const artists = Array.isArray(track?.Artists)
     ? track.Artists.join(", ")
-    : track?.AlbumArtist || config.languageLabels?.artistUnknown || "Bilinmeyen Sanatçı";
+    : track?.AlbumArtist || config.languageLabels?.artistUnknown || "Unknown Artist";
 
   return `
     <div class="track-info">
-      <div class="track-name">${track?.Name || config.languageLabels?.unknownTrack || "Bilinmeyen Parça"}</div>
+      <div class="track-name">${track?.Name || config.languageLabels?.unknownTrack || "Unknown Track"}</div>
       <div class="track-artist">${artists}</div>
       <div class="track-date">${displayDate}</div>
     </div>
@@ -555,7 +555,7 @@ function formatTrackInfo(track, _index) {
 async function backupDatabase() {
   const backupBtn = document.getElementById("backup-db-btn");
   const original = backupBtn.innerHTML;
-  backupBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${config.languageLabels?.backupInProgress || "Yedekleniyor..."}`;
+  backupBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${config.languageLabels?.backupInProgress || "Backing up..."}`;
   backupBtn.disabled = true;
 
   try {
@@ -593,15 +593,15 @@ async function backupDatabase() {
       try { document.body.removeChild(a); } catch {}
       URL.revokeObjectURL(url);
       showNotification(
-        `<i class="fas fa-check-circle"></i> ${config.languageLabels?.backupSuccess || "Veritabanı başarıyla yedeklendi"}`,
+        `<i class="fas fa-check-circle"></i> ${config.languageLabels?.backupSuccess || "Database successfully backed up"}`,
         3000,
         "db"
       );
     }, 100);
   } catch (error) {
-    console.error("Yedekleme hatası:", error);
+    console.error("Backup error:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.backupError || "Yedekleme sırasında hata oluştu"}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.backupError || "Error during backup"}`,
       3000,
       "error"
     );
@@ -618,7 +618,7 @@ async function handleRestoreFile(event) {
   const confirmed =
     confirm(
       config.languageLabels?.confirmRestore ||
-        "Veritabanını yedekten geri yüklemek istediğinize emin misiniz? Mevcut verilerin üzerine yazılacak!"
+        "Are you sure you want to restore the database from backup? Current data will be overwritten!"
     ) === true;
 
   if (!confirmed) {
@@ -628,7 +628,7 @@ async function handleRestoreFile(event) {
 
   const restoreBtn = document.getElementById("restore-db-btn");
   const originalRestoreText = restoreBtn.innerHTML;
-  restoreBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${config.languageLabels?.restoreInProgress || "Geri yükleniyor..."}`;
+  restoreBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${config.languageLabels?.restoreInProgress || "Restoring..."}`;
   restoreBtn.disabled = true;
 
   const progressContainer = document.createElement("div");
@@ -653,17 +653,17 @@ async function handleRestoreFile(event) {
     const backupData = JSON.parse(fileContent);
 
     if (!backupData.tracks || !Array.isArray(backupData.tracks)) {
-      throw new Error(config.languageLabels?.invalidBackupFile || "Geçersiz yedek dosyası");
+      throw new Error(config.languageLabels?.invalidBackupFile || "Invalid backup file");
     }
 
     showNotification(
-      `<i class="fas fa-database"></i> ${config.languageLabels?.restoreStarted || "Geri yükleme başlatıldı..."}`,
+      `<i class="fas fa-database"></i> ${config.languageLabels?.restoreStarted || "Restore started..."}`,
       3000,
       "db"
     );
 
     await musicDB.deleteAllTracks();
-    updateProgress(20, config.languageLabels?.cleaningDatabase || "Veritabanı temizleniyor...");
+    updateProgress(20, config.languageLabels?.cleaningDatabase || "Cleaning database...");
 
     const totalBatches = Math.ceil(backupData.tracks.length / BATCH_SIZE);
     for (let i = 0; i < totalBatches; i++) {
@@ -675,11 +675,11 @@ async function handleRestoreFile(event) {
       const progress = 20 + Math.floor((i / totalBatches) * 60);
       updateProgress(
         progress,
-        `${config.languageLabels?.restoringTracks || "Şarkılar geri yükleniyor"} (${end}/${backupData.tracks.length})`
+        `${config.languageLabels?.restoringTracks || "Restoring tracks"} (${end}/${backupData.tracks.length})`
       );
     }
 
-    updateProgress(80, config.languageLabels?.restoringDeletedItems || "Silinmiş öğeler geri yükleniyor...");
+    updateProgress(80, config.languageLabels?.restoringDeletedItems || "Restoring deleted items...");
     if (backupData.deletedTracks && Array.isArray(backupData.deletedTracks)) {
       try {
         const db = await musicDB.openDB();
@@ -707,9 +707,9 @@ async function handleRestoreFile(event) {
           addTx.onerror = () => resolve();
         });
       } catch (e) {
-        console.warn("Silinmiş öğeler geri yüklenirken hata:", e);
+        console.warn("Error restoring deleted items:", e);
         showNotification(
-          `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels?.restorePartialSuccess || "Şarkılar geri yüklendi ancak silinmiş öğeler yüklenemedi"}`,
+          `<i class="fas fa-exclamation-triangle"></i> ${config.languageLabels?.restorePartialSuccess || "Tracks restored but deleted items could not be restored"}`,
           4000,
           "db"
         );
@@ -717,7 +717,7 @@ async function handleRestoreFile(event) {
     }
 
     if (backupData.lyrics && Array.isArray(backupData.lyrics)) {
-      updateProgress(95, config.languageLabels?.restoringLyrics || "Şarkı sözleri geri yükleniyor...");
+      updateProgress(95, config.languageLabels?.restoringLyrics || "Restoring lyrics...");
       const db = await musicDB.openDB();
       const tx = db.transaction(["lyrics"], "readwrite");
       const store = tx.objectStore("lyrics");
@@ -733,17 +733,17 @@ async function handleRestoreFile(event) {
       });
     }
 
-    updateProgress(100, config.languageLabels?.restoreComplete || "Geri yükleme tamamlandı!");
+    updateProgress(100, config.languageLabels?.restoreComplete || "Restore completed!");
     showNotification(
-      `<i class="fas fa-check-circle"></i> ${config.languageLabels?.restoreSuccess || "Veritabanı başarıyla geri yüklendi"}`,
+      `<i class="fas fa-check-circle"></i> ${config.languageLabels?.restoreSuccess || "Database successfully restored"}`,
       3000,
       "db"
     );
     await loadStatsIntoModal(true);
   } catch (error) {
-    console.error("Geri yükleme hatası:", error);
+    console.error("Restore error:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.restoreError || "Geri yükleme sırasında hata oluştu:"} ${error.message}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.restoreError || "Error during restore:"} ${error.message}`,
       5000,
       "error"
     );
@@ -768,7 +768,7 @@ async function clearDatabaseConfirmFlow() {
   const confirmed =
     confirm(
       config.languageLabels?.confirmClearDatabase ||
-        "Tüm veritabanını temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz!"
+        "Are you sure you want to clear the entire database? This action cannot be undone!"
     ) === true;
 
   if (!confirmed) return;
@@ -797,7 +797,7 @@ async function clearDatabaseConfirmFlow() {
     });
 
     showNotification(
-      `<i class="fas fa-check-circle"></i> ${config.languageLabels?.databaseCleared || "Veritabanı başarıyla temizlendi"}`,
+      `<i class="fas fa-check-circle"></i> ${config.languageLabels?.databaseCleared || "Database successfully cleared"}`,
       3000,
       "db"
     );
@@ -805,9 +805,9 @@ async function clearDatabaseConfirmFlow() {
     cachedStats = null;
     await loadStatsIntoModal(true);
   } catch (error) {
-    console.error("Veritabanı temizlenirken hata:", error);
+    console.error("Error clearing database:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.clearDatabaseError || "Veritabanı temizlenirken hata oluştu"}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.clearDatabaseError || "Error clearing database"}`,
       3000,
       "error"
     );
@@ -823,14 +823,14 @@ async function showAllUpdates() {
   try {
     const stats = await musicDB.getStats();
     toggleDetailedModal(
-      config.languageLabels?.allUpdatedTracks || "Son Eklenen Tüm Parçalar",
+      config.languageLabels?.allUpdatedTracks || "All Recently Added Tracks",
       stats.recentlyAdded,
       formatTrackInfo
     );
   } catch (error) {
-    console.error("Eklenenler yüklenirken hata:", error);
+    console.error("Error loading added tracks:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.loadStatsError || "İstatistikler yüklenirken hata oluştu"}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.loadStatsError || "Error loading stats"}`,
       3000,
       "error"
     );
@@ -850,14 +850,14 @@ async function showAllDeletes() {
     const recentlyDeleted = await musicDB.getRecentlyDeleted();
     const items = recentlyDeleted.map((d) => ({ ...d.trackData, DateCreated: d.deletedAt }));
     toggleDetailedModal(
-      config.languageLabels?.allDeletedTracks || "Son Silinen Tüm Parçalar",
+      config.languageLabels?.allDeletedTracks || "All Recently Deleted Tracks",
       items,
       formatTrackInfo
     );
   } catch (error) {
-    console.error("Silinenler yüklenirken hata:", error);
+    console.error("Error loading deleted tracks:", error);
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.loadStatsError || "İstatistikler yüklenirken hata oluştu"}`,
+      `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels?.loadStatsError || "Error loading stats"}`,
       3000,
       "error"
     );
@@ -893,9 +893,9 @@ async function migrateDateCreated() {
         t.DateCreated = t.LastUpdated || new Date().toISOString();
       });
       await musicDB.saveTracksInBatches(toUpdate);
-      console.log(`${toUpdate.length} kayıt güncellendi`);
+      console.log(`${toUpdate.length} records updated`);
     }
   } catch (error) {
-    console.error("Migration hatası:", error);
+    console.error("Migration error:", error);
   }
 }

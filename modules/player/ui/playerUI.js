@@ -557,7 +557,7 @@ async function getTrackImage(track) {
     const tags = await readID3Tags(track.Id);
     if (tags?.pictureUri) return tags.pictureUri;
   } catch (e) {
-    console.warn(`ID3 etiketi okunamadı (ID: ${track.Id})`, e);
+    console.warn(`ID3 tag could not be read (ID: ${track.Id})`, e);
   }
 
   return null;
@@ -615,10 +615,10 @@ async function toggleFavorite() {
       throw new Error(`HTTP ${response.status}`);
     }
   } catch (error) {
-    console.error("Favori işlemi hatası:", error);
+    console.error("Favorite operation error:", error);
     showNotification(
       `<i class="fas fa-exclamation-circle"></i> ${
-        config.languageLabels.favoriteError || "Favori işlemi sırasında hata"
+        config.languageLabels.favoriteError || "Error during favorite operation"
       }`,
       3000,
       'error'
@@ -878,7 +878,7 @@ async function showTopTracksInMainView(tab) {
       signal: __topTracksAborter.signal
     });
 
-    if (!response.ok) throw new Error('Şarkılar yüklenemedi');
+    if (!response.ok) throw new Error('Songs could not be loaded');
 
     const data = await response.json();
     let tracks = data.Items || [];
@@ -905,7 +905,7 @@ async function showTopTracksInMainView(tab) {
           () => addAndPlayTrack(track)
         );
         loadInitialBatch([{ track, trackElement, coverElement, index }])
-          .catch(err => console.error('Görsel yükleme hatası:', err));
+          .catch(err => console.error('Image loading error:', err));
 
         uiElements.list.appendChild(trackElement);
         return { track, trackElement, coverElement, index };
@@ -940,7 +940,7 @@ async function showTopTracksInMainView(tab) {
 
   } catch (error) {
     if (error?.name === 'AbortError') return;
-    console.error('Sıradaki şarkılar yüklenirken hata:', error);
+    console.error('Error loading next tracks:', error);
     const errorElement = document.createElement('div');
     errorElement.className = 'error-message';
     errorElement.textContent = config.languageLabels.loadError || 'Yüklenirken hata oluştu';
@@ -1194,7 +1194,7 @@ async function setupImageLoading(trackElements, observer) {
 
 async function loadInitialBatch(trackElements) {
   if (!Array.isArray(trackElements)) {
-    console.error('loadInitialBatch: trackElements bir dizi olmalı', trackElements);
+    console.error('loadInitialBatch: trackElements must be an array', trackElements);
     return;
   }
 
@@ -1214,7 +1214,7 @@ async function loadInitialBatch(trackElements) {
         }
         trackElement.dataset.loaded = "true";
       } catch (err) {
-        console.error('İlk batch görsel yükleme hatası:', err);
+        console.error('First batch image load error:', err);
       }
     }));
   }
@@ -1235,7 +1235,7 @@ async function loadTrackImageForElement(trackElement, trackIndex) {
     }
     trackElement.dataset.loaded = "true";
   } catch (err) {
-    console.error(`Track #${trackIndex} resmi yüklenirken hata:`, err);
+    console.error(`Error loading image for track #${trackIndex}:`, err);
   }
 }
 
