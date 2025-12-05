@@ -9,38 +9,38 @@ SLIDER_SCRIPTS=(
 )
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Bu script root olarak çalıştırılmalıdır."
+    echo "This script must be run as root."
     exit 1
 fi
 
-echo "Jellyfin servisi durduruluyor..."
+echo "Stopping Jellyfin service..."
 systemctl stop jellyfin
 
-echo "HTML dosyasındaki slider kodları kaldırılıyor..."
+echo "Removing slider codes from HTML file..."
 REMOVED_ANY=false
 for script in "${SLIDER_SCRIPTS[@]}"; do
     if grep -qF "$script" "$HTML_FILE"; then
         sed -i "s|$script||g" "$HTML_FILE"
-        echo "Script kaldırıldı: $script"
+        echo "Script removed: $script"
         REMOVED_ANY=true
     fi
 done
 
 if [ "$REMOVED_ANY" = false ]; then
-    echo "HTML dosyasında slider kodları bulunamadı."
+    echo "Slider codes not found in HTML file."
 else
-    echo "HTML slider kodları başarıyla kaldırıldı!"
+    echo "HTML slider codes successfully removed!"
 fi
 
-echo "Slider dosyaları siliniyor..."
+echo "Deleting slider files..."
 if [ -d "$SLIDER_DIR" ]; then
     rm -rf "$SLIDER_DIR"
-    echo "Slider dosyaları başarıyla silindi: $SLIDER_DIR"
+    echo "Slider files successfully deleted: $SLIDER_DIR"
 else
-    echo "Slider dizini bulunamadı: $SLIDER_DIR"
+    echo "Slider directory not found: $SLIDER_DIR"
 fi
 
-echo "Jellyfin servisi başlatılıyor..."
+echo "Starting Jellyfin service..."
 systemctl start jellyfin
 
-echo "Slider kaldırma işlemi tamamlandı!"
+echo "Slider uninstallation completed!"

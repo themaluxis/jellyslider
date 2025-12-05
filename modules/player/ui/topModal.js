@@ -447,12 +447,12 @@ async function loadExistingPlaylists(selectElement) {
 
     selectElement.disabled = false;
   } catch (error) {
-    console.error("Listeler yüklenirken hata:", error);
+    console.error("Error loading playlists:", error);
     selectElement.innerHTML = '';
 
     const errorOption = document.createElement("option");
     errorOption.value = "";
-    errorOption.textContent = config.languageLabels.loadError || "Listeler yüklenemedi";
+    errorOption.textContent = config.languageLabels.loadError || "Playlists could not be loaded";
     selectElement.appendChild(errorOption);
     selectElement.disabled = true;
   }

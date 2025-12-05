@@ -186,34 +186,34 @@ ensure_nfo_trailer() {
   local url; url="$(xml_escape "$url_raw")"
 
   if nfo_has_trailer "$nfo"; then
-    echo "[SKIP] NFO zaten trailer içeriyor: $nfo"
+    echo "[SKIP] NFO already contains trailer: $nfo"
     return 1
   fi
 
   if [[ -f "$nfo" ]]; then
     if perl -0777 -pe "s#</$root>#  <trailer>$url</trailer>\n</$root>#i" -i "$nfo"; then
-      echo "[OK] NFO güncellendi: $nfo"
+      echo "[OK] NFO updated: $nfo"
       return 0
     else
-      echo "[WARN] $nfo içine yazamadım."
+      echo "[WARN] Could not write to $nfo."
       return 2
     fi
   else
-    mkdir -p "$(dirname "$nfo")" || { echo "[WARN] NFO klasörü oluşturulamadı: $(dirname "$nfo")"; return 2; }
+    mkdir -p "$(dirname "$nfo")" || { echo "[WARN] Could not create NFO directory: $(dirname "$nfo")"; return 2; }
     cat > "$nfo" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <$root>
   <trailer>$url</trailer>
 </$root>
 EOF
-    echo "[OK] NFO oluşturuldu: $nfo"
+    echo "[OK] NFO created: $nfo"
     return 0
   fi
 }
 
 process_item() {
   local id="$1" type="$2" name="$3" year="$4" path="$5" tmdb="$6" imdb="$7" user_id="$8"
-  echo "[DEBUG] İşleniyor: $name ($type)" >&2
+  echo "[DEBUG] Processing: $name ($type)" >&2
   if [[ "$type" == "Movie" ]]; then
     local tmdb_id="$tmdb"
     if [[ -z "$tmdb_id" && -n "$imdb" ]]; then
@@ -221,7 +221,7 @@ process_item() {
       [[ -n "$map" ]] && tmdb_id="${map##*:}"
     fi
     if [[ -z "$tmdb_id" ]]; then
-      echo "[ATLA] TMDb ID yok: $name"
+      echo "[SKIP] No TMDb ID: $name"
       CNT_NO_TMDB=$((CNT_NO_TMDB+1))
       return 0
     fi
@@ -231,12 +231,12 @@ process_item() {
       [[ -z "$url" ]] && continue
 
       IFS='|' read -r nfo root <<<"$(pick_nfo_path "$type" "$path")"
-      [[ -z "$nfo" || -z "$root" ]] && { echo "[ATLA] NFO yolu çözülemedi: $name"; CNT_MISC=$((CNT_MISC+1)); return 0; }
+      [[ -z "$nfo" || -z "$root" ]] && { echo "[SKIP] Could not resolve NFO path: $name"; CNT_MISC=$((CNT_MISC+1)); return 0; }
 
       if ensure_nfo_trailer "$nfo" "$root" "$url"; then
         curl -sS -X POST -H "X-Emby-Token: $JF_API_KEY" \
           "$JF_BASE/Items/$id/Refresh?Recursive=false&MetadataRefreshMode=FullRefresh&ImageRefreshMode=Default&ReplaceAllImages=false&ReplaceAllMetadata=false" >/dev/null \
-          || { echo "[WARN] Refresh çağrısı başarısız: $name"; CNT_FAIL_REFRESH=$((CNT_FAIL_REFRESH+1)); }
+          || { echo "[WARN] Refresh call failed: $name"; CNT_FAIL_REFRESH=$((CNT_FAIL_REFRESH+1)); }
         echo "[OK] $name -> $url"
         CNT_OK=$((CNT_OK+1))
         sleep "$SLEEP_SECS"
@@ -250,7 +250,7 @@ process_item() {
       fi
     done < <(find_trailer_keys_movie "$tmdb_id" || true)
 
-    echo "[ATLA] Trailer bulunamadı: $name"
+    echo "[SKIP] Trailer not found: $name"
     CNT_NOT_FOUND=$((CNT_NOT_FOUND+1))
     return 0
   fi
@@ -271,7 +271,7 @@ process_item() {
     [[ "$type" == "Season"  ]] && season_no="$idx"
 
     if [[ -z "${series_tmdb:-}" ]]; then
-      echo "[ATLA] Series TMDb yok: $name"
+      echo "[SKIP] Series TMDb missing: $name"
       CNT_NO_TMDB=$((CNT_NO_TMDB+1))
       return 0
     fi
@@ -281,12 +281,12 @@ process_item() {
       [[ -z "$url" ]] && continue
 
       IFS='|' read -r nfo root <<<"$(pick_nfo_path "$type" "$path")"
-      [[ -z "$nfo" || -z "$root" ]] && { echo "[ATLA] NFO yolu çözülemedi: $name"; CNT_MISC=$((CNT_MISC+1)); return 0; }
+      [[ -z "$nfo" || -z "$root" ]] && { echo "[SKIP] Could not resolve NFO path: $name"; CNT_MISC=$((CNT_MISC+1)); return 0; }
 
       if ensure_nfo_trailer "$nfo" "$root" "$url"; then
         curl -sS -X POST -H "X-Emby-Token: $JF_API_KEY" \
           "$JF_BASE/Items/$id/Refresh?Recursive=false&MetadataRefreshMode=FullRefresh&ImageRefreshMode=Default&ReplaceAllImages=false&ReplaceAllMetadata=false" >/dev/null \
-          || { echo "[WARN] Refresh çağrısı başarısız: $name"; CNT_FAIL_REFRESH=$((CNT_FAIL_REFRESH+1)); }
+          || { echo "[WARN] Refresh call failed: $name"; CNT_FAIL_REFRESH=$((CNT_FAIL_REFRESH+1)); }
         echo "[OK] $name -> $url"
         CNT_OK=$((CNT_OK+1))
         sleep "$SLEEP_SECS"
@@ -300,19 +300,19 @@ process_item() {
       fi
     done < <(find_trailer_keys_tv "$series_tmdb" "${season_no:-}" "${episode_no:-}" || true)
 
-    echo "[ATLA] Trailer bulunamadı: $name"
+    echo "[SKIP] Trailer not found: $name"
     CNT_NOT_FOUND=$((CNT_NOT_FOUND+1))
     return 0
   fi
 
-  echo "[ATLA] Tür desteklenmiyor: $type - $name"
+  echo "[SKIP] Unsupported type: $type - $name"
   CNT_UNSUPPORTED=$((CNT_UNSUPPORTED+1))
   return 0
 }
 
 main() {
   local user_id; user_id="$(resolve_user_id)"
-  echo "[INFO] Kullanıcı: $user_id" >&2
+  echo "[INFO] User: $user_id" >&2
 
   local start=0
   while :; do
@@ -334,7 +334,7 @@ main() {
       local imdb=$(echo "$it" | jq -r '.ProviderIds.Imdb // empty')
 
       if [[ -z "$path" ]]; then
-        echo "[ATLA] Yol yok: $name"
+        echo "[SKIP] No path: $name"
         CNT_NO_PATH=$((CNT_NO_PATH+1))
         continue
       fi
@@ -349,17 +349,17 @@ main() {
   done
 
   echo
-  echo "===== ÖZET ====="
-  echo "Toplam işlenen öğe      : $CNT_TOTAL"
-  echo "Başarılı (NFO eklendi)  : $CNT_OK"
-  echo "Atlandı (zaten vardı)   : $CNT_SKIP_HAS"
-  echo "Trailer bulunamadı      : $CNT_NOT_FOUND"
-  echo "NFO yazma hatası        : $CNT_FAIL_WRITE"
-  echo "Refresh hatası          : $CNT_FAIL_REFRESH"
-  echo "TMDb ID yok             : $CNT_NO_TMDB"
-  echo "Yol (Path) yok          : $CNT_NO_PATH"
-  echo "Desteklenmeyen tür      : $CNT_UNSUPPORTED"
-  echo "Diğer/çeşitli           : $CNT_MISC"
+  echo "===== SUMMARY ====="
+  echo "Total processed         : $CNT_TOTAL"
+  echo "Success (NFO added)     : $CNT_OK"
+  echo "Skipped (already exists): $CNT_SKIP_HAS"
+  echo "Trailer not found       : $CNT_NOT_FOUND"
+  echo "NFO write error         : $CNT_FAIL_WRITE"
+  echo "Refresh error           : $CNT_FAIL_REFRESH"
+  echo "No TMDb ID              : $CNT_NO_TMDB"
+  echo "No Path                 : $CNT_NO_PATH"
+  echo "Unsupported type        : $CNT_UNSUPPORTED"
+  echo "Other/Misc              : $CNT_MISC"
   echo "========================"
 }
 

@@ -701,7 +701,7 @@ function cleanupRow(row) {
 function renderRecommendationCards(row, items, serverId) {
   clearRowWithCleanup(row);
   if (!items || !items.length) {
-    row.innerHTML = `<div class="no-recommendations">${(config.languageLabels?.noRecommendations) || labels.noRecommendations || "Öneri bulunamadı"}</div>`;
+    row.innerHTML = `<div class="no-recommendations">${(config.languageLabels?.noRecommendations) || labels.noRecommendations || "No recommendations found"}</div>`;
     return;
   }
 
@@ -822,8 +822,8 @@ function createRecommendationCard(item, serverId, aboveFold = false) {
   const genres = Array.isArray(item.Genres) ? item.Genres.slice(0, 3).join(", ") : "";
   const isSeries = item.Type === "Series";
   const typeLabel = isSeries
-    ? ((config.languageLabels && config.languageLabels.dizi) || "Dizi")
-    : ((config.languageLabels && config.languageLabels.film) || "Film");
+    ? ((config.languageLabels && config.languageLabels.dizi) || "Series")
+    : ((config.languageLabels && config.languageLabels.film) || "Movie");
   const typeIcon = isSeries ? '🎬' : '🎞️';
   const community = Number.isFinite(item.CommunityRating)
     ? `<div class="community-rating" title="Community Rating">⭐ ${item.CommunityRating.toFixed(1)}</div>`
@@ -878,7 +878,7 @@ if (posterUrlHQ) {
     noImg.className = 'prc-noimg-label';
     noImg.textContent =
       (config.languageLabels && (config.languageLabels.noImage || config.languageLabels.loadingText))
-      || (labels.noImage || 'Görsel yok');
+      || (labels.noImage || 'No Image');
     noImg.style.minHeight = '220px';
     noImg.style.display = 'flex';
     noImg.style.alignItems = 'center';
@@ -1129,7 +1129,7 @@ async function ensureGenreLoaded(idx) {
     row.innerHTML = '';
     setupScroller(row);
     if (!items || !items.length) {
-      row.innerHTML = `<div class="no-recommendations">${labels.noRecommendations || "Uygun içerik yok"}</div>`;
+      row.innerHTML = `<div class="no-recommendations">${labels.noRecommendations || "No matching content"}</div>`;
       triggerScrollerUpdate(row);
       return;
     }
@@ -1155,7 +1155,7 @@ async function ensureGenreLoaded(idx) {
     })();
   } catch (err) {
     console.warn('Genre hub load failed:', genre, err);
-    row.innerHTML = `<div class="no-recommendations">${labels.noRecommendations || "Uygun içerik yok"}</div>`;
+    row.innerHTML = `<div class="no-recommendations">${labels.noRecommendations || "No matching content"}</div>`;
     setupScroller(row);
     triggerScrollerUpdate(row);
   }
@@ -1214,7 +1214,7 @@ async function fetchItemsBySingleGenre(userId, genre, limit = 30, minRating = 0)
     const items = Array.isArray(data?.Items) ? data.Items : [];
     return filterAndTrimByRating(items, minRating, limit);
   } catch (e) {
-    if (e?.name !== 'AbortError') console.error("fetchItemsBySingleGenre hata:", e);
+    if (e?.name !== 'AbortError') console.error("fetchItemsBySingleGenre error:", e);
     return [];
   } finally {
     __genreFetchCtrls.delete(ctrl);
@@ -1264,7 +1264,7 @@ async function getCachedGenresWeekly(userId) {
     const genres = uniqueNormalizedGenres(list);
     return genres;
   } catch (e) {
-    console.warn("Tür listesi alınamadı:", e);
+    console.warn("Genre list could not be fetched:", e);
     return [];
   }
 }

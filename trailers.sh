@@ -271,24 +271,24 @@ process_item() {
       skip)
         if [[ "${ENABLE_THEME_LINK:-0}" -eq 1 ]]; then
           ensure_backdrops_theme "$dir" "$out" || true
-          echo "[ATLA] Zaten var: $out  -> theme.mp4 kuruldu/korundu."
+          echo "[SKIP] Already exists: $out  -> theme.mp4 setup/preserved."
         else
-          echo "[ATLA] Zaten var: $out  ->  $name ($year)"
+          echo "[SKIP] Already exists: $out  ->  $name ($year)"
         fi
         DL_SKIP+=1
         return 0
         ;;
       replace)
-        echo "[BİLGİ] Üzerine yazılacak: $out"
+        echo "[INFO] Will overwrite: $out"
         ;;
       if-better)
-        echo "[BİLGİ] if-better modu: karşılaştırma için indirilecek."
+        echo "[INFO] if-better mode: downloading for comparison."
         compare_after=1
         ;;
     esac
   fi
 
-  echo "[DEBUG] İşleniyor: $name (IMDb: ${imdb:-}, TMDb: ${tmdb:-}, Tür: $type)" >&2
+  echo "[DEBUG] Processing: $name (IMDb: ${imdb:-}, TMDb: ${tmdb:-}, Type: $type)" >&2
   local tmdb_id="${tmdb:-}" season_no="" episode_no=""
   if [[ "$type" == "Movie" ]]; then
     if [[ -z "$tmdb_id" && -n "${imdb:-}" ]]; then
@@ -318,13 +318,13 @@ process_item() {
 
   local key_stream success=0
   if [[ "$type" == "Movie" ]]; then
-    [[ -z "${tmdb_id:-}" ]] && { echo "[ATLA] TMDb ID yok: $name"; DL_FAIL+=1; return 0; }
+    [[ -z "${tmdb_id:-}" ]] && { echo "[SKIP] No TMDb ID: $name"; DL_FAIL+=1; return 0; }
     key_stream="$(find_trailer_keys_movie "$tmdb_id" || true)"
   elif [[ "$type" == "Series" || "$type" == "Season" || "$type" == "Episode" ]]; then
-    [[ -z "${tmdb_id:-}" ]] && { echo "[ATLA] Series TMDb yok: $name"; DL_FAIL+=1; return 0; }
+    [[ -z "${tmdb_id:-}" ]] && { echo "[SKIP] No Series TMDb: $name"; DL_FAIL+=1; return 0; }
     key_stream="$(find_trailer_keys_tv "$tmdb_id" "${season_no:-}" "${episode_no:-}" || true)"
   else
-    echo "[ATLA] Tür desteklenmiyor: $type - $name"
+    echo "[SKIP] Unsupported type: $type - $name"
     DL_FAIL+=1
     return 0
   fi
@@ -347,16 +347,16 @@ process_item() {
     fi
 
     tried=$((tried+1))
-    echo "[DEBUG] Denenen #$tried: ${site}:${key}" >&2
+    echo "[DEBUG] Trying #$tried: ${site}:${key}" >&2
 
     local free_mb_dest; free_mb_dest=$(get_free_mb "$dir"); [[ -z "$free_mb_dest" ]] && free_mb_dest=0
     local free_mb_work; free_mb_work=$(get_free_mb "$WORK_DIR"); [[ -z "$free_mb_work" ]] && free_mb_work=0
     if (( free_mb_dest < MIN_FREE_MB )); then
-      echo "[WARN] Hedefte yetersiz boş alan: ${free_mb_dest} MiB (< ${MIN_FREE_MB} MiB). Atlanıyor: $name ($year)" >&2
+      echo "[WARN] Destination has insufficient space: ${free_mb_dest} MiB (< ${MIN_FREE_MB} MiB). Skipping: $name ($year)" >&2
       continue
     fi
     if (( free_mb_work < MIN_FREE_MB )); then
-      echo "[WARN] Çalışma klasöründe yetersiz boş alan: ${free_mb_work} MiB (< ${MIN_FREE_MB} MiB). Atlanıyor: $name ($year)" >&2
+      echo "[WARN] Work dir has insufficient space: ${free_mb_work} MiB (< ${MIN_FREE_MB} MiB). Skipping: $name ($year)" >&2
       continue
     fi
 
@@ -364,7 +364,7 @@ process_item() {
     cleanup_tmp() { rm -f "$tmp" >/dev/null 2>&1 || true; }
     trap 'cleanup_tmp' EXIT INT TERM
 
-    echo "[INDIR] $name ($year) -> $out  [${site}:${key}] (best mp4)"
+    echo "[DL] $name ($year) -> $out  [${site}:${key}] (best mp4)"
     local yd_base=(
       --force-ipv4
       -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]"
@@ -378,10 +378,10 @@ process_item() {
     fi
 
     if ! yt-dlp "${yd_base[@]}"; then
-      echo "[WARN] yt-dlp indirme başarısız (${site}:${key})." >&2
+      echo "[WARN] yt-dlp download failed (${site}:${key})." >&2
       cleanup_tmp
       if df -Pm "$dir" | awk 'NR==2{exit !($4<1)}'; then
-        echo "[ERROR] Diskte yer kalmamış. Film atlanıyor: $name ($year)" >&2
+        echo "[ERROR] Disk full. Skipping movie: $name ($year)" >&2
       fi
       trap - EXIT INT TERM
       continue
@@ -389,14 +389,14 @@ process_item() {
 
     local size_bytes; size_bytes=$(stat -c%s "$tmp" 2>/dev/null || echo 0)
     if [[ "${size_bytes:-0}" -lt $((2*1024*1024)) ]]; then
-      echo "[WARN] Dosya çok küçük (${size_bytes}B). Siliniyor ve sonraki aday denenecek..." >&2
+      echo "[WARN] File too small (${size_bytes}B). Deleting and trying next candidate..." >&2
       cleanup_tmp; continue
     fi
     if command -v ffprobe >/dev/null; then
       local dur; dur=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$tmp" 2>/dev/null || echo 0)
       awk "BEGIN { exit !($dur < 20 && $dur > 0) }" && short=1 || short=0
       if (( short == 1 )); then
-        echo "[WARN] Süre kısa (${dur}s). Siliniyor ve sonraki aday denenecek..." >&2
+        echo "[WARN] Duration too short (${dur}s). Deleting and trying next candidate..." >&2
         cleanup_tmp; continue
       fi
     fi
@@ -426,35 +426,35 @@ process_item() {
             exit(better ? 0 : 1)
           }'
       if [[ $? -eq 0 ]]; then
-        echo "[OK] Yeni trailer daha iyi bulundu (if-better): değiştiriliyor."
+        echo "[OK] Found better trailer (if-better): replacing."
         if ! mv -f "$tmp" "$out" 2>/dev/null; then
-          echo "[HATA] mv başarısız, yazılamıyor: $out" >&2
+          echo "[ERROR] mv failed, cannot write: $out" >&2
           rm -f "$tmp"
           DL_FAIL+=1
           trap - EXIT INT TERM
           return 0
         fi
-        ensure_backdrops_theme "$dir" "$out" || true
+        ensure_backdrop_theme "$dir/backdrops" "$out"
       else
-        echo "[ATLA] Mevcut trailer daha iyi/eşdeğer: yenisi silindi."
+        echo "[SKIP] Current trailer is better/equal: new one deleted."
         rm -f "$tmp"
         trap - EXIT INT TERM
-        if [[ "${ENABLE_THEME_LINK:-0}" -eq 1 ]]; then
-          ensure_backdrops_theme "$dir" "$out" || true
+        if [[ "${CREATE_BACKDROP_THEME}" == "true" ]]; then
+          ensure_backdrop_theme "$dir/backdrops" "$out"
         fi
         DL_SKIP+=1
         return 0
       fi
     else
       if ! mv -f "$tmp" "$out" 2>/dev/null; then
-        echo "[HATA] mv başarısız, yazılamıyor: $out" >&2
+        echo "[ERROR] mv failed, cannot write: $out" >&2
         rm -f "$tmp"
         DL_FAIL+=1
         trap - EXIT INT TERM
         return 0
       fi
-      if [[ "${ENABLE_THEME_LINK:-0}" -eq 1 ]]; then
-        ensure_backdrops_theme "$dir" "$out" || true
+      if [[ "${CREATE_BACKDROP_THEME}" == "true" ]]; then
+        ensure_backdrop_theme "$dir/backdrops" "$out"
       fi
     fi
 
@@ -462,7 +462,7 @@ process_item() {
     curl -sS -X POST -H "X-Emby-Token: $JF_API_KEY" \
       "$JF_BASE/Items/$id/Refresh?Recursive=true&ImageRefreshMode=Default&MetadataRefreshMode=Default&RegenerateTrickplay=false&ReplaceAllMetadata=false" >/dev/null || true
 
-    echo "[OK] Eklendi ve yenilendi: $out"
+    echo "[OK] Added and refreshed: $out"
     DL_OK+=1
     sleep "$SLEEP_SECS"
     success=1
@@ -471,7 +471,7 @@ process_item() {
   done <<< "$key_stream"
 
   if (( success == 0 )); then
-    echo "[ATLA] Uygun indirilebilir trailer bulunamadı: $name ($year)"
+    echo "[SKIP] No suitable trailer found: $name ($year)"
     DL_FAIL+=1
   fi
   return 0
@@ -519,7 +519,7 @@ fi
 done
 
 
-echo "[INFO] Geçici dosyalar temizleniyor..."
+echo "[INFO] Cleaning temporary files..."
 for d in "${!SEEN_DIRS[@]}"; do
   find "$d" -maxdepth 1 -type f \
     \( -name '*.part' -o -name '*.tmp' -o -name '*.tmp.mp4' -o -name '*.ytdl' \) \
@@ -539,5 +539,5 @@ find "$WORK_DIR" -type f \
   -print -delete 2>/dev/null || true
 
 echo
-echo "BİTTİ: işlenen=$processed"
-echo "ÖZET -> indirilen=${DL_OK}, başarısız=${DL_FAIL}, atlanan(zaten vardı)=${DL_SKIP}"
+echo "DONE: processed=$processed"
+echo "SUMMARY -> downloaded=${DL_OK}, failed=${DL_FAIL}, skipped(existed)=${DL_SKIP}"

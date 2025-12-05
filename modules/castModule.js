@@ -105,7 +105,7 @@ export async function loadAvailableDevices(itemId, dropdown) {
       dropdown.appendChild(deviceElement);
     });
   } catch (error) {
-    console.error('Cihazlar yüklenirken hata:', error);
+    console.error('Error loading devices:', error);
     dropdown.innerHTML = `<div class="error-message">${config.languageLabels.casthata}: ${error.message}</div>`;
   }
 }
@@ -151,7 +151,7 @@ export async function startPlayback(itemId, sessionId) {
     showNotification(config.languageLabels.castbasarili, 'success');
     return true;
   } catch (error) {
-    console.error("Oynatma hatası:", error);
+    console.error("Playback error:", error);
     showNotification(`${config.languageLabels.castoynatmahata}: ${error.message}`, 'error');
     return false;
   }
@@ -410,7 +410,7 @@ async function showNowPlayingModal(nowPlayingItem, device) {
             });
 
           } catch (err) {
-            console.error("Mute/Unmute hatası:", err);
+            console.error("Mute/Unmute error:", err);
             showNotification(`${config.languageLabels.seshata}: ${err.message}`, 'error');
           }
         }
@@ -485,7 +485,7 @@ async function showNowPlayingModal(nowPlayingItem, device) {
           })
         });
 
-        if (!response.ok) throw new Error('Volume ayarlanamadı');
+        if (!response.ok) throw new Error('Volume could not be set');
         if (volumeValue) volumeValue.textContent = `${volume}%`;
         slider.dataset.lastVolume = volume;
         if (volume === 0 && muteButton) {
@@ -494,7 +494,7 @@ async function showNowPlayingModal(nowPlayingItem, device) {
         }
 
       } catch (err) {
-        console.error("Ses seviyesi hatası:", err);
+        console.error("Volume error:", err);
         showNotification(`${config.languageLabels.seshata}: ${err.message}`, 'error');
         const lastVolume = slider.dataset.lastVolume || '50';
         slider.value = lastVolume;
@@ -540,7 +540,7 @@ async function showNowPlayingModal(nowPlayingItem, device) {
     });
 
   } catch (err) {
-    console.error("Modal hatası:", err);
+    console.error("Modal error:", err);
     showNotification(`${config.languageLabels.icerikhata}: ${err.message}`, 'error');
   }
 }
@@ -673,10 +673,10 @@ async function getServerInfoHtml() {
       </div>
     `;
   } catch (error) {
-    console.error('Sunucu bilgisi alınırken hata:', error);
+    console.error('Error fetching server info:', error);
     return `
       <div class="server-info-container">
-        <div class="error-message">${config.languageLabels.sunucubilgihata || 'Sunucu bilgisi alınamadı'}</div>
+        <div class="error-message">${config.languageLabels.sunucubilgihata || 'Server info unavailable'}</div>
       </div>
     `;
   }
@@ -712,8 +712,8 @@ async function togglePlayback(sessionId, currentlyPaused) {
     buttons.forEach(button => {
       button.dataset.isPaused = !currentlyPaused;
       button.innerHTML = !currentlyPaused
-        ? '▶️ ' + (config.languageLabels.devamet || "Devam Ettir")
-        : '⏸️ ' + (config.languageLabels.duraklat || "Duraklat");
+        ? '▶️ ' + (config.languageLabels.devamet || "Resume")
+        : '⏸️ ' + (config.languageLabels.duraklat || "Pause");
     });
 
     showNotification(
@@ -734,8 +734,8 @@ async function toggleFavorite(itemId, makeFavorite) {
     buttons.forEach(button => {
       button.dataset.isFavorite = makeFavorite;
       button.innerHTML = makeFavorite
-        ? '💔 ' + (config.languageLabels.removeFromFavorites || "Favoriden Kaldır")
-        : '❤️ ' + (config.languageLabels.addToFavorites || "Favoriye Ekle");
+        ? '💔 ' + (config.languageLabels.removeFromFavorites || "Remove from Favorites")
+        : '❤️ ' + (config.languageLabels.addToFavorites || "Add to Favorites");
     });
 
     showNotification(
@@ -745,7 +745,7 @@ async function toggleFavorite(itemId, makeFavorite) {
       'success'
     );
   } catch (err) {
-    console.error("Favori işlem hatası:", err);
+    console.error("Favorite operation error:", err);
     showNotification(`${config.languageLabels.favorihata}: ${err.message}`, 'error');
   }
 }
@@ -787,15 +787,15 @@ async function updatePlaybackTimes(modal, activeDevices) {
 
       const timeElement = modal.querySelector(`.castmodal-slide:nth-child(${index + 1}) .castmodal-info p:nth-child(5)`);
       if (timeElement) {
-        timeElement.innerHTML = `<strong>${config.languageLabels.sure || "Süre"}:</strong> ${played} / ${duration}`;
+        timeElement.innerHTML = `<strong>${config.languageLabels.sure || "Duration"}:</strong> ${played} / ${duration}`;
       }
 
       const playButton = modal.querySelector(`.castmodal-slide:nth-child(${index + 1}) .castcontrol-button[data-session-id="${device.Id}"]:not(.mute-button)`);
       if (playButton) {
         playButton.dataset.isPaused = isPaused;
         playButton.innerHTML = isPaused
-          ? '▶️ ' + (config.languageLabels.devamet || "Devam Ettir")
-          : '⏸️ ' + (config.languageLabels.duraklat || "Duraklat");
+          ? '▶️ ' + (config.languageLabels.devamet || "Resume")
+          : '⏸️ ' + (config.languageLabels.duraklat || "Pause");
       }
     });
     if (modal) {
@@ -804,7 +804,7 @@ async function updatePlaybackTimes(modal, activeDevices) {
       });
     }
   } catch (err) {
-    console.error("Zaman güncelleme hatası:", err);
+    console.error("Time update error:", err);
     if (modal) modal.remove();
     if (timeUpdateInterval) clearInterval(timeUpdateInterval);
   }
@@ -886,10 +886,10 @@ async function getServerInfo() {
       headers: { 'Authorization': getAuthHeader() }
     });
 
-    if (!response.ok) throw new Error('Sunucu bilgisi alınamadı');
+    if (!response.ok) throw new Error('Server info could not be fetched');
     return await response.json();
   } catch (error) {
-    console.error('Sunucu bilgisi alınırken hata:', error);
+    console.error('Error fetching server info:', error);
     return {};
   }
 }

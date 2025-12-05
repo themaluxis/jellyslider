@@ -7,26 +7,26 @@ SOURCE_DIR="$(dirname "$(realpath "$0")")"
 INSERT_HTML='<script type="module" async src="/web/slider/main.js"></script><script type="module" async src="/web/slider/modules/player/main.js"></script>'
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Bu script root olarak çalıştırılmalıdır."
+    echo "This script must be run as root."
     exit 1
 fi
 
-echo "Slider klasörü oluşturuluyor: $SLIDER_DIR"
+echo "Creating slider directory: $SLIDER_DIR"
 if mkdir -p "$SLIDER_DIR"; then
     if [ -d "$SLIDER_DIR" ]; then
-        echo "Klasör başarıyla oluşturuldu, dosyalar kopyalanıyor..."
+        echo "Directory created successfully, copying files..."
         if cp -r "$SOURCE_DIR"/* "$SLIDER_DIR"/ 2>/dev/null; then
-            echo "Dosyalar başarıyla kopyalandı: $SLIDER_DIR"
+            echo "Files copied successfully: $SLIDER_DIR"
         else
-            echo "HATA: Dosyalar kopyalanırken bir sorun oluştu!" >&2
+            echo "ERROR: An error occurred while copying files!" >&2
             exit 1
         fi
     else
-        echo "HATA: Klasör oluşturulamadı: $SLIDER_DIR" >&2
+        echo "ERROR: Could not create directory: $SLIDER_DIR" >&2
         exit 1
     fi
 else
-    echo "HATA: Klasör oluşturulamadı: $SLIDER_DIR" >&2
+    echo "ERROR: Could not create directory: $SLIDER_DIR" >&2
     exit 1
 fi
 
@@ -35,9 +35,9 @@ if ! grep -q "slider/main.js" "$HTML_FILE" || ! grep -q "slider/modules/player/m
     sed -i '/slider\/modules\/player\/main.js/d' "$HTML_FILE"
     sed -i "s|</body>|__TEMP_BODY__|g" "$HTML_FILE"
     sed -i "s|__TEMP_BODY__|${INSERT_HTML}</body>|g" "$HTML_FILE"
-    echo "HTML snippet'leri başarıyla eklendi!"
+    echo "HTML snippets added successfully!"
 else
-    echo "HTML snippet'leri zaten mevcut. Atlanıyor..."
+    echo "HTML snippets already exist. Skipping..."
 fi
 
-echo "Kurulum tamamlandı!"
+echo "Installation completed!"

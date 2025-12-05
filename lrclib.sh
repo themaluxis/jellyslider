@@ -7,19 +7,19 @@ MUSIC_DIR="${1%/}"
 OVERWRITE=false
 
 if [ -z "$MUSIC_DIR" ]; then
-    echo "Kullanım: $0 /Müzik/klasör/yolu [--overwrite]"
-    echo "Örnek: $0 ~/Müzik"
-    echo "Örnek (üzerine yazma): $0 ~/Müzik --overwrite"
+    echo "Usage: $0 /path/to/music/folder [--overwrite]"
+    echo "Example: $0 ~/Music"
+    echo "Example (overwrite): $0 ~/Music --overwrite"
     exit 1
 fi
 
 if [ "$2" == "--overwrite" ]; then
     OVERWRITE=true
-    echo "UYARI: Mevcut LRC dosyalarının üzerine yazılacak!"
+    echo "WARNING: Existing LRC files will be overwritten!"
 fi
 
 if [ ! -d "$MUSIC_DIR" ]; then
-    echo "Hata: Belirtilen klasör bulunamadı: $MUSIC_DIR"
+    echo "Error: Specified folder not found: $MUSIC_DIR"
     exit 1
 fi
 
@@ -31,8 +31,8 @@ SUCCESS_PLAIN=0
 FAILED=0
 SKIPPED=0
 
-echo "Şarkı sözleri indiriliyor: $MUSIC_DIR"
-echo "Üzerine yazma modu: $OVERWRITE"
+echo "Downloading lyrics: $MUSIC_DIR"
+echo "Overwrite mode: $OVERWRITE"
 echo "----------------------------------------"
 
 while IFS= read -r -d '' file; do
@@ -41,8 +41,8 @@ while IFS= read -r -d '' file; do
     lrc_file="${file%.*}.lrc"
 
     if [ -f "$lrc_file" ] && [ "$OVERWRITE" = false ]; then
-        echo -e "\nDosya: $file"
-        echo "Atlandı: LRC dosyası zaten var (üzerine yazma kapalı)"
+        echo -e "\nFile: $file"
+        echo "Skipped: LRC file already exists (overwrite off)"
         ((SKIPPED++))
         continue
     fi
@@ -50,7 +50,7 @@ while IFS= read -r -d '' file; do
     filename=$(basename "$file")
     filename="${filename%.*}"
 
-    echo -e "\nDosya: $file"
+    echo -e "\nFile: $file"
 
     artist=$(echo "$filename" | awk -F " - " '{print $1}' | sed -e 's/\[.*\]//g' -e 's/(.*)//g' | xargs)
     title=$(echo "$filename" | awk -F " - " '{print $2}' | sed -e 's/\[.*\]//g' -e 's/(.*)//g' | xargs)
@@ -66,19 +66,19 @@ while IFS= read -r -d '' file; do
     fi
 
     if [ -z "$artist" ] || [ -z "$title" ]; then
-        echo "Uyarı: Dosya adı uygun formatta değil: '$filename'"
+        echo "Warning: Filename format not valid: '$filename'"
         ((FAILED++))
         continue
     fi
 
-    echo "Aranıyor: '$artist' - '$title'"
+    echo "Searching: '$artist' - '$title'"
 
     response=$(curl -s -G "$API_URL" \
         --data-urlencode "artist_name=$artist" \
         --data-urlencode "track_name=$title")
 
     if [ $? -ne 0 ]; then
-        echo "Hata: API isteği başarısız oldu"
+        echo "Error: API request failed"
         ((FAILED++))
         continue
     fi
@@ -91,7 +91,7 @@ while IFS= read -r -d '' file; do
         lrc_type="plain"
 
         if [ -z "$lrc_content" ] || [ "$lrc_content" = "null" ]; then
-            echo "Uyarı: Hiçbir şarkı sözü bulunamadı (ne synced ne de plain)"
+            echo "Warning: No lyrics found (neither synced nor plain)"
             ((FAILED++))
             continue
         fi
@@ -101,30 +101,30 @@ while IFS= read -r -d '' file; do
 
     if [ $? -eq 0 ]; then
         if [ "$lrc_type" = "synced" ]; then
-            echo "Başarılı: $lrc_file oluşturuldu (SENKRONIZE sözler)"
+            echo "Success: $lrc_file created (SYNCED lyrics)"
             ((SUCCESS_SYNCED++))
         else
-            echo "Başarılı: $lrc_file oluşturuldu (DÜZ sözler)"
+            echo "Success: $lrc_file created (PLAIN lyrics)"
             ((SUCCESS_PLAIN++))
         fi
     else
-        echo "Hata: $lrc_file oluşturulamadı/güncellenemedi"
+        echo "Error: $lrc_file could not be created/updated"
         ((FAILED++))
     fi
 
 done < <(find "$MUSIC_DIR" -type f \( -iname "*.mp3" -o -iname "*.flac" \) -print0)
 
 echo -e "\n----------------------------------------"
-echo "İşlem tamamlandı"
-echo "Toplam şarkı: $TOTAL"
-echo "Başarılı (Senkronize): $SUCCESS_SYNCED"
-echo "Başarılı (Düz): $SUCCESS_PLAIN"
-echo "Atlandı: $SKIPPED"
-echo "Başarısız: $FAILED"
+echo "Process completed"
+echo "Total songs: $TOTAL"
+echo "Success (Synced): $SUCCESS_SYNCED"
+echo "Success (Plain): $SUCCESS_PLAIN"
+echo "Skipped: $SKIPPED"
+echo "Failed: $FAILED"
 
 if [ "$FAILED" -gt 0 ]; then
-    echo -e "\nNot: Başarısız olanlar için:"
-    echo "1. Dosya adlarını 'Sanatçı - Şarkı' formatında düzenlemeyi deneyin"
-    echo "2. --overwrite parametresiyle mevcut LRC'lerin üzerine yazmayı deneyin"
-    echo "3. Şarkı sözlerini manuel olarak lrclib.net üzerinden arayabilirsiniz"
+    echo -e "\nNote: For failed items:"
+    echo "1. Try organizing filenames as 'Artist - Song'"
+    echo "2. Try overwriting existing LRCs with --overwrite parameter"
+    echo "3. You can manually search lyrics via lrclib.net"
 fi
