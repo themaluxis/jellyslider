@@ -74,7 +74,7 @@ export function createModernPlayerUI() {
       : config.languageLabels.sirada || "Sıradakiler";
   } else {
     nextTracksName.textContent = getSourceLabel(config.nextTracksSource);
-    nextTracksName.title = config.languageLabels.changeSource || "Kaynağı değiştirmek için tıklayın";
+    nextTracksName.title = config.languageLabels.changeSource || "Click to change source";
     nextTracksName.onclick = async (e) => {
       e.stopPropagation();
       const cfg = getConfig();
@@ -107,15 +107,15 @@ export function createModernPlayerUI() {
     {
       className: "theme-toggle-btn",
       iconClass: config.playerTheme === 'light' ? "fas fa-moon" : "fas fa-sun",
-      title: config.playerTheme === 'light' ? config.languageLabels.darkTheme || 'Karanlık Tema' : config.languageLabels.lightTheme || 'Aydınlık Tema',
+      title: config.playerTheme === 'light' ? config.languageLabels.darkTheme || 'Dark Theme' : config.languageLabels.lightTheme || 'Light Theme',
       onClick: toggleTheme
     },
     { className: "playlist-btn", iconClass: "fas fa-list", title: config.languageLabels.playlist, onClick: togglePlaylistModal },
-    { className: "jplaylist-btn", iconClass: "fas fa-list-music", title: config.languageLabels.jellyfinPlaylists || "Jellyfin Oynatma Listesi", onClick: showJellyfinPlaylistsModal },
+    { className: "jplaylist-btn", iconClass: "fas fa-list-music", title: config.languageLabels.jellyfinPlaylists || "Jellyfin Playlists", onClick: showJellyfinPlaylistsModal },
     {
       className: "settingsLink",
       iconClass: "fas fa-cog",
-      title: config.languageLabels.ayarlar || "Ayarlar",
+      title: config.languageLabels.ayarlar || "Settings",
       onClick: (e) => {
         e.preventDefault();
         const settings = initSettings();
@@ -141,8 +141,8 @@ export function createModernPlayerUI() {
       themeBtn.innerHTML = `<i class="fas fa-${theme === 'light' ? 'moon' : 'sun'}"></i>`;
       const cfgNow = getConfig();
       themeBtn.title = theme === 'light'
-        ? (cfgNow.languageLabels.darkTheme || 'Karanlık Tema')
-        : (cfgNow.languageLabels.lightTheme || 'Aydınlık Tema');
+        ? (cfgNow.languageLabels.darkTheme || 'Dark Theme')
+        : (cfgNow.languageLabels.lightTheme || 'Light Theme');
     }
     updatePlayerBackground();
     initializePlayerStyle();
@@ -155,7 +155,7 @@ export function createModernPlayerUI() {
   const favoriteBtn = document.createElement("div");
   favoriteBtn.className = "musicfavorite-btn hidden";
   favoriteBtn.innerHTML = '<i class="fas fa-heart"></i>';
-  favoriteBtn.title = config.languageLabels.addToFavorites || "Favorilere ekle";
+  favoriteBtn.title = config.languageLabels.addToFavorites || "Add to favorites";
   favoriteBtn.onclick = (e) => {
     e.stopPropagation();
     toggleFavorite();
@@ -219,7 +219,7 @@ export function createModernPlayerUI() {
   const topTracksBtn = createButton({
     className: "top-tracks-btn",
     iconClass: "fas fa-chart-line",
-    title: config.languageLabels.myMusic || "En Çok Dinlenenler",
+    title: config.languageLabels.myMusic || "Top Tracks",
     onClick: () => { showTopTracksModal(); },
   });
 
@@ -231,8 +231,8 @@ export function createModernPlayerUI() {
     className: "remove-on-play-btn",
     iconClass: "fas fa-trash-list",
     title: musicPlayerState.userSettings.removeOnPlay
-      ? config.languageLabels.removeOnPlayOn || "Çaldıktan sonra sil: Açık"
-      : config.languageLabels.removeOnPlayOff || "Çaldıktan sonra sil: Kapalı",
+      ? config.languageLabels.removeOnPlayOn || "Remove after play: On"
+      : config.languageLabels.removeOnPlayOff || "Remove after play: Off",
     onClick: toggleRemoveOnPlayMode
   });
 
@@ -244,7 +244,7 @@ export function createModernPlayerUI() {
   const genreFilterBtn = createButton({
     className: "genre-filter-btn",
     iconClass: "fas fa-filter",
-    title: config.languageLabels.filterByGenre || "Türe göre filtrele",
+    title: config.languageLabels.filterByGenre || "Filter by genre",
     onClick: showGenreFilterModal
   });
   const prevBtn = createButton({ iconClass: "fas fa-step-backward", title: config.languageLabels.previousTrack, onClick: playPrevious });
@@ -298,13 +298,13 @@ export function createModernPlayerUI() {
     topTracksBtn, volumeBtn, createButton({
       className: "fullscreen-btn",
       iconClass: "fa-solid fa-maximize",
-      title: config.languageLabels.fullscreen || "Tam Ekran",
+      title: config.languageLabels.fullscreen || "Fullscreen",
       onClick: toggleFullscreenMode
     }),
     createButton({
       className: "style-toggle-btn",
       iconClass: "fa-solid fa-up-down",
-      title: config.playerStyle === 'player' ? config.languageLabels.dikeyStil || 'Dikey Stil' : config.languageLabels.yatayStil || 'Yatay Stil',
+      title: config.playerStyle === 'player' ? config.languageLabels.dikeyStil || 'Vertical Style' : config.languageLabels.yatayStil || 'Horizontal Style',
       onClick: togglePlayerStyle
     }),
   ];
@@ -572,7 +572,7 @@ async function toggleFavorite() {
     const authToken = getAuthToken();
     if (!authToken) {
       showNotification(
-        `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels.authRequired || "Kimlik doğrulama hatası"}`,
+        `<i class="fas fa-exclamation-circle"></i> ${config.languageLabels.authRequired || "Authentication error"}`,
         3000,
         'error'
       );
@@ -600,14 +600,14 @@ async function toggleFavorite() {
           ? '<i class="fas fa-heart" style="color:#e91e63"></i>'
           : '<i class="fas fa-heart"></i>';
         favoriteBtn.title = track.UserData.IsFavorite
-          ? config.languageLabels.removeFromFavorites || "Favorilerden kaldır"
-          : config.languageLabels.addToFavorites || "Favorilere ekle";
+          ? config.languageLabels.removeFromFavorites || "Remove from favorites"
+          : config.languageLabels.addToFavorites || "Add to favorites";
       }
 
       showNotification(
         `<i class="fas fa-heart"></i> ${track.UserData.IsFavorite
-          ? config.languageLabels.addedToFavorites || "Favorilere eklendi"
-          : config.languageLabels.removedFromFavorites || "Favorilerden kaldırıldı"}`,
+          ? config.languageLabels.addedToFavorites || "Added to favorites"
+          : config.languageLabels.removedFromFavorites || "Removed from favorites"}`,
         2000,
         'kontrol'
       );
@@ -656,12 +656,12 @@ function toggleTheme() {
   const themeBtn = document.querySelector('.theme-toggle-btn');
   if (themeBtn) {
     themeBtn.innerHTML = `<i class="fas fa-${newTheme === 'light' ? 'moon' : 'sun'}"></i>`;
-    themeBtn.title = newTheme === 'light' ? config.languageLabels.darkTheme || 'Karanlık Tema' : config.languageLabels.lightTheme || 'Aydınlık Tema';
+    themeBtn.title = newTheme === 'light' ? config.languageLabels.darkTheme || 'Dark Theme' : config.languageLabels.lightTheme || 'Light Theme';
   }
   loadCSS();
 
   showNotification(
-    `<i class="fas fa-${newTheme === 'light' ? 'sun' : 'moon'}"></i> ${newTheme === 'light' ? config.languageLabels.lightThemeEnabled || 'Aydınlık tema etkin' : config.languageLabels.darkThemeEnabled || 'Karanlık tema etkin'}`,
+    `<i class="fas fa-${newTheme === 'light' ? 'sun' : 'moon'}"></i> ${newTheme === 'light' ? config.languageLabels.lightThemeEnabled || 'Light theme enabled' : config.languageLabels.darkThemeEnabled || 'Dark theme enabled'}`,
     2000,
     'info'
   );
@@ -683,16 +683,16 @@ function togglePlayerStyle() {
   if (styleBtn) {
     styleBtn.innerHTML = `<i class="fas fa-${iconName}"></i>`;
     styleBtn.title = newStyle === 'player'
-      ? config.languageLabels.dikeyStil || 'Dikey Stil'
-      : config.languageLabels.yatayStil || 'Yatay Stil';
+      ? config.languageLabels.dikeyStil || 'Vertical Style'
+      : config.languageLabels.yatayStil || 'Horizontal Style';
   }
 
   loadCSS();
   showNotification(
     `<i class="fas fa-${notifName}"></i> ${
       newStyle === 'player'
-        ? config.languageLabels.yatayStilEnabled || 'Yatay stil etkin'
-        : config.languageLabels.dikeyStilEnabled || 'Dikey stil etkin'
+        ? config.languageLabels.yatayStilEnabled || 'Horizontal style enabled'
+        : config.languageLabels.dikeyStilEnabled || 'Vertical style enabled'
     }`,
     2000,
     'info'
@@ -786,8 +786,8 @@ function toggleFullscreenMode() {
   showNotification(
     `<i class="fa-solid fa-${newMode ? 'maximize' : 'minimize'}"></i> ${
       newMode
-        ? config.languageLabels.fullscreenEnabled || 'Tam ekran modu etkin'
-        : config.languageLabels.fullscreenDisabled || 'Tam ekran modu devre dışı'
+        ? config.languageLabels.fullscreenEnabled || 'Fullscreen mode enabled'
+        : config.languageLabels.fullscreenDisabled || 'Fullscreen mode disabled'
     }`,
     2000,
     'info'
@@ -804,11 +804,11 @@ function initializePlayerStyle() {
   if (config.playerStyle === 'newplayer') {
     player.classList.add('style-toggle');
     styleToggleBtn.className = 'fas fa-left-right';
-    styleToggleBtn.title = config.languageLabels.dikeyStil || 'Dikey Stil';
+    styleToggleBtn.title = config.languageLabels.dikeyStil || 'Vertical Style';
   } else {
     player.classList.remove('style-toggle');
     styleToggleBtn.className = 'fas fa-up-down';
-    styleToggleBtn.title = config.languageLabels.yatayStil || 'Yatay Stil';
+    styleToggleBtn.title = config.languageLabels.yatayStil || 'Horizontal Style';
   }
 }
 
@@ -889,11 +889,11 @@ async function showTopTracksInMainView(tab) {
     if (tracks.length === 0) {
       const noTracksElement = document.createElement('div');
       noTracksElement.className = 'no-tracks';
-      noTracksElement.textContent = config.languageLabels.noTracks || 'Şarkı bulunamadı';
+      noTracksElement.textContent = config.languageLabels.noTracks || 'No tracks found';
       uiElements.list.appendChild(noTracksElement);
 
       showNotification(
-        `<i class="fas fa-info-circle"></i> ${getSourceLabel(tab)}: ${config.languageLabels.noTracks || 'Şarkı bulunamadı'}`,
+        `<i class="fas fa-info-circle"></i> ${getSourceLabel(tab)}: ${config.languageLabels.noTracks || 'No tracks found'}`,
         2000,
         'info'
       );
@@ -943,13 +943,13 @@ async function showTopTracksInMainView(tab) {
     console.error('Error loading next tracks:', error);
     const errorElement = document.createElement('div');
     errorElement.className = 'error-message';
-    errorElement.textContent = config.languageLabels.loadError || 'Yüklenirken hata oluştu';
+    errorElement.textContent = config.languageLabels.loadError || 'Error loading';
     uiElements.list.appendChild(errorElement);
 
     nextTracksContainer.append(uiElements.wrapper, uiElements.name);
 
     showNotification(
-      `<i class="fas fa-exclamation-circle"></i> ${getSourceLabel(tab)}: ${config.languageLabels.loadError || 'Yüklenirken hata oluştu'}`,
+      `<i class="fas fa-exclamation-circle"></i> ${getSourceLabel(tab)}: ${config.languageLabels.loadError || 'Error loading'}`,
       2000,
       'error'
     );
@@ -1125,27 +1125,27 @@ function getApiUrlForTab(tab, userId) {
     case 'top':
       return {
         apiUrl: `/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=${config.topTrack}`,
-        trackListName: config.languageLabels.topTracks || 'En Çok Dinlenenler'
+        trackListName: config.languageLabels.topTracks || 'Top Tracks'
       };
     case 'recent':
       return {
         apiUrl: `/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=${config.topTrack}`,
-        trackListName: config.languageLabels.recentTracks || 'Son Dinlenenler'
+        trackListName: config.languageLabels.recentTracks || 'Recently Played'
       };
     case 'latest':
       return {
         apiUrl: `/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=${config.topTrack}`,
-        trackListName: config.languageLabels.latestTracks || 'Son Eklenenler'
+        trackListName: config.languageLabels.latestTracks || 'Recently Added'
       };
     case 'favorites':
       return {
         apiUrl: `/Users/${userId}/Items?Filters=IsFavorite&IncludeItemTypes=Audio&Recursive=true&SortBy=SortName&SortOrder=Ascending&Limit=${config.topTrack}`,
-        trackListName: config.languageLabels.favorites || 'Favorilerim'
+        trackListName: config.languageLabels.favorites || 'Favorites'
       };
     default:
       return {
         apiUrl: `/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=${config.nextTrack}`,
-        trackListName: config.languageLabels.topTracks || 'En Çok Dinlenenler'
+        trackListName: config.languageLabels.topTracks || 'Top Tracks'
       };
   }
 }
@@ -1168,13 +1168,13 @@ function handleIntersection(entries, observer) {
 function getNextTrackSource(currentSource) {
   const config = getConfig();
   const sources = [
-    { value: 'top', label: config.languageLabels.topTracks || 'En Çok Dinlenenler' },
-    { value: 'recent', label: config.languageLabels.recentTracks || 'Son Dinlenenler' },
-    { value: 'latest', label: config.languageLabels.latestTracks || 'Son Eklenenler' },
-    { value: 'favorites', label: config.languageLabels.favorites || 'Favorilerim' },
+    { value: 'top', label: config.languageLabels.topTracks || 'Top Tracks' },
+    { value: 'recent', label: config.languageLabels.recentTracks || 'Recently Played' },
+    { value: 'latest', label: config.languageLabels.latestTracks || 'Recently Added' },
+    { value: 'favorites', label: config.languageLabels.favorites || 'Favorites' },
     { value: 'playlist', label: musicPlayerState.userSettings.shuffle
-        ? config.languageLabels.rastgele || "Rastgele"
-        : config.languageLabels.sirada || "Sıradakiler" }
+        ? config.languageLabels.rastgele || "Random"
+        : config.languageLabels.sirada || "Next Up" }
   ];
 
   const currentIndex = sources.findIndex(s => s.value === currentSource);
@@ -1242,13 +1242,13 @@ async function loadTrackImageForElement(trackElement, trackIndex) {
 function getSourceLabel(source) {
   const config = getConfig();
   const labels = {
-    'top': config.languageLabels.topTracks || "En Çok Dinlenenler",
-    'recent': config.languageLabels.recentTracks || "Son Dinlenenler",
-    'latest': config.languageLabels.latestTracks || "Son Eklenenler",
-    'favorites': config.languageLabels.favorites || "Favorilerim",
+    'top': config.languageLabels.topTracks || "Top Tracks",
+    'recent': config.languageLabels.recentTracks || "Recently Played",
+    'latest': config.languageLabels.latestTracks || "Recently Added",
+    'favorites': config.languageLabels.favorites || "Favorites",
     'playlist': musicPlayerState.userSettings.shuffle
-      ? config.languageLabels.rastgele || "Rastgele"
-      : config.languageLabels.sirada || "Sıradakiler"
+      ? config.languageLabels.rastgele || "Random"
+      : config.languageLabels.sirada || "Next Up"
   };
   return labels[source] || source;
 }

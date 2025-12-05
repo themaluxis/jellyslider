@@ -185,12 +185,12 @@ export function createArtistModal() {
     try {
       await checkForNewMusic();
       showNotification(
-        `<i class="fas fa-check-circle"></i> ${config.languageLabels.syncCompleted || "Senkronizasyon tamamlandı"}`,
+        `<i class="fas fa-check-circle"></i> ${config.languageLabels.syncCompleted || "Sync completed"}`,
         3000,
         "db"
       );
     } catch (error) {
-      console.error("Senkronizasyon hatası:", error);
+      console.error("Sync error:", error);
     } finally {
       fetchNewMusicBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
     }
