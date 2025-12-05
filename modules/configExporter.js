@@ -29,8 +29,8 @@ export function uploadAndApplyConfig(file) {
       applyRawConfig(configData);
       alert(config.languageLabels.ayarlarBasariylaYuklendi || 'Ayarlar başarıyla yüklendi.');
     } catch (err) {
-      console.error('Yedek dosyası okunamadı:', err);
-      alert(config.languageLabels.gecersizYedekDosyasi || 'Geçersiz yedek dosyası.');
+      console.error('Failed to read backup file:', err);
+      alert(config.languageLabels.gecersizYedekDosyasi || 'Invalid backup file.');
     }
   };
   reader.readAsText(file);

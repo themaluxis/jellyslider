@@ -142,7 +142,7 @@ export async function updateHeaderUserAvatar() {
     applyAvatarStyles(avatarElement);
     setupAvatarProtection(headerButton, user);
   } catch (err) {
-    console.error("Avatar güncelleme hatası:", err);
+    console.error("Avatar update error:", err);
     } finally {
     _updatingAvatar = false;
   }
@@ -251,7 +251,7 @@ async function createDicebearAvatar(user) {
     }
     return svgElement;
   } catch (error) {
-    console.error('DiceBear avatar oluşturma hatası, baş harflerle avatar oluşturuluyor:', error);
+    console.error('DiceBear avatar creation error, falling back to initials:', error);
     return createInitialsAvatar(user);
   }
 }
@@ -550,7 +550,7 @@ export function initAvatarSystem() {
     if (!ok && retryCount++ < maxRetries) {
       setTimeout(tryOnce, retryDelay);
     } else if (!ok) {
-      console.error("Avatar güncellenemedi, maksimum deneme sayısına ulaşıldı.");
+      console.error("Avatar could not be updated, maximum retry count reached.");
     }
   };
   tryOnce();
@@ -604,7 +604,7 @@ function startAvatarRotation(interval = 60000) {
       clearAvatarCache();
       await updateHeaderUserAvatar();
     } catch (error) {
-      console.error('Otomatik avatar rotasyonu hatası:', error);
+      console.error('Automatic avatar rotation error:', error);
     }
   }, interval);
 }

@@ -308,13 +308,13 @@ async function toggleFavorite(itemId, isFavorite, buttonElement) {
       setTimeout(() => { buttonElement.style.transform = 'scale(1)'; }, 200);
       return true;
     } else {
-      console.error('Favori durumu değiştirilemedi:', response.status);
+      console.error('Favorite status could not be changed:', response.status);
       buttonElement.style.animation = 'shake 0.5s';
       setTimeout(() => { buttonElement.style.animation = ''; }, 500);
       return false;
     }
   } catch (error) {
-    console.error('Favori işlemi hatası:', error);
+    console.error('Favorite operation error:', error);
     buttonElement.style.animation = 'shake 0.5s';
     setTimeout(() => { buttonElement.style.animation = ''; }, 500);
     return false;
@@ -442,7 +442,7 @@ function createPreviewButton(card, studioName, studioId, userId) {
       const fetched = await fetchStudioItemsViaUsers(studioId, studioName, userId, signal);
       studioItems = selectTopNWithMinRating(fetched, MIN_RATING, 5);
     } catch (err) {
-      console.error('Ön izleme verileri alınamadı:', err);
+      console.error('Preview data could not be fetched:', err);
       studioItems = [];
     } finally {
       isFetching = false;
@@ -613,7 +613,7 @@ async function resolveLogoUrl(name) {
 async function fetchStudios(signal) {
   const url = `/Studios?Limit=300&Recursive=true&SortBy=SortName&SortOrder=Ascending`;
   const res = await fetch(url, { headers: hJSON(), signal });
-  if (!res.ok) throw new Error("Studios alınamadı");
+  if (!res.ok) throw new Error("Studios could not be fetched");
   const data = await res.json();
   const items = Array.isArray(data?.Items) ? data.Items : (Array.isArray(data) ? data : []);
   return items.map(s => ({
@@ -831,7 +831,7 @@ export async function renderStudioHubs() {
     if (!resolved.length) {
     }
   } catch (e) {
-    console.warn("Studio hubs render hatası:", e);
+    console.warn("Studio hubs render error:", e);
   } finally {
     __studioHubBusy = false;
     __fetchAbort = null;

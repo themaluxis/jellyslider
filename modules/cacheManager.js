@@ -86,11 +86,11 @@ function tryLocalStorageSet(key, value, evictBatch, getOldestKeys) {
         } catch (e2) {
         }
       }
-      console.warn('[qualityCache] QuotaExceeded: kalıcı depolama devre dışı bırakıldı (in-memory only).');
+      console.warn('[qualityCache] QuotaExceeded: persistent storage disabled (in-memory only).');
       inMemoryOnly = true;
       return false;
     }
-    console.warn('[qualityCache] localStorage setItem hatası:', err);
+    console.warn('[qualityCache] localStorage setItem error:', err);
     inMemoryOnly = true;
     return false;
   }
@@ -127,7 +127,7 @@ const videoQualityCache = {
         this.save(true);
       }
     } catch (e) {
-      console.warn('[qualityCache] Yükleme hatası, sıfırlanıyor:', e);
+      console.warn('[qualityCache] Load error, resetting:', e);
       this.data.clear();
     }
   },
@@ -165,7 +165,7 @@ const videoQualityCache = {
         if (!ok) {
         }
       } catch (e) {
-        console.warn('[qualityCache] Save hatası:', e);
+        console.warn('[qualityCache] Save error:', e);
         inMemoryOnly = true;
       }
     };

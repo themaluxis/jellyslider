@@ -393,7 +393,7 @@ async function fetchLatestAll() {
       `/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=50`
     );
   } catch (e) {
-    console.error("[notif] Latest(Audio) isteği hata:", e);
+    console.error("[notif] Latest(Audio) fetch error:", e);
     latestAudioResp = {};
   }
 
@@ -1048,7 +1048,7 @@ items.forEach((it, idx) => {
   container.appendChild(card);
 });
   } catch (e) {
-    console.error("Resume listesi alınamadı:", e);
+    console.error("Resume list fetch error:", e);
     container.innerHTML = `<div class="jf-error">${config.languageLabels.listError}</div>`;
   }
 }
@@ -1110,7 +1110,7 @@ async function pollLatest({ seedIfFirstRun = false } = {}) {
       }
     }
   } catch (e) {
-    console.error("Latest poll hatası:", e);
+    console.error("Latest poll error:", e);
   }
 }
 
@@ -1564,7 +1564,7 @@ async function fetchActivityLog(limit = 30) {
     const msg = String(e?.message || "");
     const code = e?.status;
     if (code !== 401 && code !== 403 && !msg.includes("401") && !msg.includes("403")) {
-      console.error("[notif] ActivityLog isteği hata:", e);
+      console.error("[notif] ActivityLog fetch error:", e);
     }
     return [];
   }
@@ -2283,6 +2283,6 @@ function formatEpisodeHeading({
     }
   });
 
-  console.log('%c[notif:test] hazir — jfNotifTest.enable({panel:true}) ile aç',
+  console.log('%c[notif:test] ready — use jfNotifTest.enable({panel:true}) to open',
     'color:#6cf;font-weight:bold;');
 })();

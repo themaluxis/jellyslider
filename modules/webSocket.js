@@ -29,7 +29,7 @@ window.webSocketMonitor = {
   enabled: false,
   logs: [],
   maxLogs: 1000,
-  connectionStatus: 'bağlanıyor',
+  connectionStatus: 'connecting',
   lastMessageTime: null,
   messageCount: 0
 };
@@ -206,7 +206,7 @@ function clearPlaybackState(reason = "stale_or_manual") {
     window.currentPlayingItemId
   ) {
     if (isDevEnvironment()) {
-      console.log("[WS] Oynatma durumu temizleniyor:", reason);
+      console.log("[WS] Playback state cleaning:", reason);
     }
   }
   window.currentMediaSourceId = null;
@@ -268,18 +268,18 @@ function attachToExistingWebSocket() {
     ensureSessionsPolling();
     ensureStaleWatchDog();
     if (window.webSocketMonitor.enabled) {
-      addMonitorLog('BAĞLANTI', 'ApiClient WebSocket bağlantısına dinleyici eklendi', {
+      addMonitorLog('CONNECTION', 'ApiClient WebSocket listener added', {
         readyState: sock.readyState,
-        url: sock.url || 'bilinmiyor'
+        url: sock.url || 'unknown'
       });
     }
   } catch (e) {
-    console.warn("WS attach hatası:", e);
+    console.warn("WS attach error:", e);
     attached = false;
     scheduleReattach();
 
     if (window.webSocketMonitor.enabled) {
-      addMonitorLog('HATA', 'WebSocket bağlantı hatası', { error: e.message });
+      addMonitorLog('ERROR', 'WebSocket connection error', { error: e.message });
     }
   }
 }
@@ -332,7 +332,7 @@ async function coldRehydrateAuthThenAttach() {
 }
 
 function onOpen() {
-  console.log("[WS] ApiClient soketine ek dinleyici bağlandı.");
+  console.log("[WS] ApiClient socket extra listener attached.");
   resetBackoff();
   scheduleFastSessionChecks(true);
   clearTimer("videoCleanup");
@@ -341,32 +341,32 @@ function onOpen() {
   try { persistAuthSnapshotFromApiClient(); } catch {}
 
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('BAĞLANTI', 'WebSocket bağlantısı açıldı');
-    window.webSocketMonitor.connectionStatus = 'bağlı';
+    addMonitorLog('CONNECTION', 'WebSocket connection opened');
+    window.webSocketMonitor.connectionStatus = 'connected';
   }
 }
 
 function onClose(evt) {
-  console.log("[WS] ApiClient soketi kapandı:", evt?.code, evt?.reason || "");
+  console.log("[WS] ApiClient socket closed:", evt?.code, evt?.reason || "");
   attached = false;
   scheduleReattach();
 
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('BAĞLANTI', 'WebSocket bağlantısı kapandı', {
+    addMonitorLog('CONNECTION', 'WebSocket connection closed', {
       code: evt?.code,
       reason: evt?.reason
     });
-    window.webSocketMonitor.connectionStatus = 'bağlantı kesildi';
+    window.webSocketMonitor.connectionStatus = 'disconnected';
   }
 }
 
 function onError(err) {
   if (isDevEnvironment()) {
-    console.warn("[WS] Hata:", err);
+    console.warn("[WS] Error:", err);
   }
 
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('HATA', 'WebSocket hatası', { error: err.message });
+    addMonitorLog('ERROR', 'WebSocket error', { error: err.message });
   }
 }
 
@@ -381,9 +381,9 @@ function onMessage(event) {
   if (window.webSocketMonitor.enabled) {
     window.webSocketMonitor.lastMessageTime = new Date();
     window.webSocketMonitor.messageCount++;
-    addMonitorLog('MESAJ', 'WebSocket mesajı alındı', {
+    addMonitorLog('MESSAGE', 'WebSocket message received', {
       messageType: payload.MessageType,
-      data: payload.Data ? 'Mevcut' : 'Yok'
+      data: payload.Data ? 'Available' : 'None'
     });
   }
 
@@ -434,7 +434,7 @@ function handlePlaybackStart(data, { isSelf }) {
   }
 
   if (isDevEnvironment()) {
-    console.log("Oynatma başladı:", {
+    console.log("Playback started:", {
       mediaSourceId,
       sessionId: s.Id || s.SessionId || null,
       itemId: item.Id || null,
@@ -445,7 +445,7 @@ function handlePlaybackStart(data, { isSelf }) {
   }
 
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('OYNAMA', 'Oynatma başladı', {
+    addMonitorLog('PLAYBACK', 'Playback started', {
       mediaSourceId,
       itemName: item.Name,
       isSelf,
@@ -480,7 +480,7 @@ function handlePlaybackProgress(data, { isSelf }) {
   markPlaybackSignal();
 
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('OYNAMA', 'Oynatma ilerlemesi', {
+    addMonitorLog('PLAYBACK', 'Playback progress', {
       mediaSourceId: window.currentMediaSourceId,
       position: s.PlayState?.PositionTicks
     });
@@ -506,7 +506,7 @@ function scheduleFullCleanupAfterVideoEnd() {
   clearTimer("videoCleanup");
   timers.videoCleanup = setTimeout(() => {
     if (isDevEnvironment()) {
-      console.log("🎬 Video bitti: 20 sn sonra tam temizlik çalıştı.");
+      console.log("🎬 Video ended: full cleanup ran after 20 sec.");
     }
     fullCleanup();
   }, 20_000);
@@ -530,18 +530,18 @@ function fullCleanup() {
   } catch {}
 
   if (isDevEnvironment()) {
-    console.log("✅ Tam temizlik tamamlandı.");
+    console.log("✅ Full cleanup completed.");
   }
 }
 
 function handlePlaybackStop(data, { isSelf }) {
   const s = data.Data || {};
   if (isDevEnvironment()) {
-    console.log("Oynatma durduruldu:", s.Item?.Name, { isSelf });
+    console.log("Playback stopped:", s.Item?.Name, { isSelf });
   }
 
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('OYNAMA', 'Oynatma durduruldu', {
+    addMonitorLog('PLAYBACK', 'Playback stopped', {
       itemName: s.Item?.Name,
       isSelf,
       reason: s.Reason
@@ -565,12 +565,12 @@ function checkForMediaSourceId(d, { isSelf }) {
   if (isSelf && mediaSourceId && mediaSourceId !== window.currentMediaSourceId) {
     window.currentMediaSourceId = mediaSourceId;
     if (isDevEnvironment()) {
-      console.log("🔍 MediaSourceId yakalandı:", mediaSourceId, "DeviceId:", d.DeviceId || "(yok)");
+      console.log("🔍 MediaSourceId caught:", mediaSourceId, "DeviceId:", d.DeviceId || "(none)");
     }
     markPlaybackSignal();
 
     if (window.webSocketMonitor.enabled) {
-      addMonitorLog('MEDYA_KAYNAĞI', 'MediaSourceId güncellendi', {
+      addMonitorLog('MEDIA_SOURCE', 'MediaSourceId updated', {
         mediaSourceId,
         deviceId: d.DeviceId
       });
@@ -590,7 +590,7 @@ async function checkActiveSessionsForMediaSourceId() {
     const deviceId = getCurrentDeviceId();
     if (!deviceId) {
       if (isDevEnvironment()) {
-        console.warn("DeviceId bulunamadı, session kontrolü atlandı");
+        console.warn("DeviceId not found, session check skipped");
       }
       return;
     }
@@ -609,7 +609,7 @@ async function checkActiveSessionsForMediaSourceId() {
 
     if (matching.length === 0) {
       if (isDevEnvironment()) {
-        console.log("Bu DeviceId ile aktif session bulunamadı:", deviceId);
+        console.log("No active session found with this DeviceId:", deviceId);
       }
       return;
     }
@@ -622,7 +622,7 @@ async function checkActiveSessionsForMediaSourceId() {
         window.currentPlayingItemId = item.Id;
 
         if (isDevEnvironment()) {
-          console.log("Aktif session bulundu:", {
+          console.log("Active session found:", {
             mediaSourceId: window.currentMediaSourceId,
             sessionId: window.currentPlayingSessionId,
             deviceId: s.DeviceId,
@@ -632,7 +632,7 @@ async function checkActiveSessionsForMediaSourceId() {
         markPlaybackSignal();
 
         if (window.webSocketMonitor.enabled) {
-          addMonitorLog('OTURUM', 'Aktif oturum bulundu', {
+          addMonitorLog('SESSION', 'Active session found', {
             mediaSourceId: window.currentMediaSourceId,
             sessionId: window.currentPlayingSessionId,
             itemName: item.Name
@@ -643,11 +643,11 @@ async function checkActiveSessionsForMediaSourceId() {
     }
   } catch (e) {
     if (isDevEnvironment()) {
-      console.error("Session kontrol hatası:", e);
+      console.error("Session check error:", e);
     }
 
     if (window.webSocketMonitor.enabled) {
-      addMonitorLog('HATA', 'Oturum kontrol hatası', { error: e.message });
+      addMonitorLog('ERROR', 'Session check error', { error: e.message });
     }
   }
 }
@@ -667,7 +667,7 @@ function ensureStaleWatchDog() {
     const budget = document.hidden ? STALE_CLEAR_MS * 2 : STALE_CLEAR_MS;
     if (elapsed > budget) {
       if (isDevEnvironment()) {
-        console.log("[WS] Stale watch: süre aşıldı, oturum doğrulanıyor…", { elapsed, budget });
+        console.log("[WS] Stale watch: timeout exceeded, verifying session…", { elapsed, budget });
       }
       try {
         await checkActiveSessionsForMediaSourceId();
@@ -677,7 +677,7 @@ function ensureStaleWatchDog() {
         clearPlaybackState("stale_timeout");
 
         if (window.webSocketMonitor.enabled) {
-          addMonitorLog('TEMİZLİK', 'Oynatma durumu temizlendi (zaman aşımı)');
+          addMonitorLog('CLEANUP', 'Playback state cleared (timeout)');
         }
       }
     }
@@ -712,7 +712,7 @@ function getMonitorStats() {
     currentPlayback: getCurrentPlaybackInfo(),
     logCount: window.webSocketMonitor.logs.length,
     attached,
-    playbackWebSocketReadyState: playbackWebSocket?.readyState || 'yok'
+    playbackWebSocketReadyState: playbackWebSocket?.readyState || 'none'
   };
 }
 
@@ -722,119 +722,119 @@ function clearMonitorLogs() {
 }
 
 export function manualWebSocketTest() {
-  console.log('=== MANUEL WEBSOCKET TESTİ BAŞLATILIYOR ===');
+  console.log('=== MANUAL WEBSOCKET TEST STARTING ===');
 
   const testResults = {
     startTime: new Date().toISOString(),
     tests: [],
-    overallStatus: 'başarılı'
+    overallStatus: 'success'
   };
   try {
     const apiClient = window.ApiClient;
     if (!apiClient) {
-      throw new Error('ApiClient bulunamadı');
+      throw new Error('ApiClient not found');
     }
-    testResults.tests.push({ name: 'ApiClient Kontrolü', status: 'başarılı' });
+    testResults.tests.push({ name: 'ApiClient Check', status: 'success' });
   } catch (error) {
-    testResults.tests.push({ name: 'ApiClient Kontrolü', status: 'başarısız', error: error.message });
-    testResults.overallStatus = 'başarısız';
+    testResults.tests.push({ name: 'ApiClient Check', status: 'failed', error: error.message });
+    testResults.overallStatus = 'failed';
   }
 
   try {
     const ws = getApiClientWebSocket();
     if (!ws) {
-      throw new Error('WebSocket bulunamadı');
+      throw new Error('WebSocket not found');
     }
     testResults.tests.push({
-      name: 'WebSocket Kontrolü',
-      status: 'başarılı',
+      name: 'WebSocket Check',
+      status: 'success',
       details: {
         readyState: ws.readyState,
-        url: ws.url || 'bilinmiyor'
+        url: ws.url || 'unknown'
       }
     });
   } catch (error) {
-    testResults.tests.push({ name: 'WebSocket Kontrolü', status: 'başarısız', error: error.message });
-    testResults.overallStatus = 'başarısız';
+    testResults.tests.push({ name: 'WebSocket Check', status: 'failed', error: error.message });
+    testResults.overallStatus = 'failed';
   }
 
   try {
     const deviceId = getCurrentDeviceId();
     if (!deviceId) {
-      throw new Error('DeviceId bulunamadı');
+      throw new Error('DeviceId not found');
     }
     testResults.tests.push({
-      name: 'DeviceId Kontrolü',
-      status: 'başarılı',
+      name: 'DeviceId Check',
+      status: 'success',
       details: { deviceId }
     });
   } catch (error) {
-    testResults.tests.push({ name: 'DeviceId Kontrolü', status: 'başarısız', error: error.message });
-    testResults.overallStatus = 'başarısız';
+    testResults.tests.push({ name: 'DeviceId Check', status: 'failed', error: error.message });
+    testResults.overallStatus = 'failed';
   }
 
   try {
     const sessionInfo = getSessionInfo();
     testResults.tests.push({
-      name: 'Session Bilgisi',
-      status: 'başarılı',
+      name: 'Session Info',
+      status: 'success',
       details: sessionInfo
     });
   } catch (error) {
-    testResults.tests.push({ name: 'Session Bilgisi', status: 'başarısız', error: error.message });
+    testResults.tests.push({ name: 'Session Info', status: 'failed', error: error.message });
   }
 
   try {
     const playbackInfo = getCurrentPlaybackInfo();
     testResults.tests.push({
-      name: 'Oynatma Durumu',
-      status: 'başarılı',
+      name: 'Playback State',
+      status: 'success',
       details: playbackInfo
     });
   } catch (error) {
-    testResults.tests.push({ name: 'Oynatma Durumu', status: 'başarısız', error: error.message });
+    testResults.tests.push({ name: 'Playback State', status: 'failed', error: error.message });
   }
 
   try {
     const timerStatus = {};
     Object.keys(timers).forEach(key => {
-      timerStatus[key] = timers[key] ? 'aktif' : 'pasif';
+      timerStatus[key] = timers[key] ? 'active' : 'inactive';
     });
     testResults.tests.push({
-      name: 'Timer Durumları',
-      status: 'başarılı',
+      name: 'Timer Statuses',
+      status: 'success',
       details: timerStatus
     });
   } catch (error) {
-    testResults.tests.push({ name: 'Timer Durumları', status: 'başarısız', error: error.message });
+    testResults.tests.push({ name: 'Timer Statuses', status: 'failed', error: error.message });
   }
 
-  console.log('🧪 WEBSOCKET TEST SONUÇLARI:');
-  console.log('Toplam Durum:', testResults.overallStatus);
+  console.log('🧪 WEBSOCKET TEST RESULTS:');
+  console.log('Overall Status:', testResults.overallStatus);
   testResults.tests.forEach(test => {
     console.log(`📊 ${test.name}:`, test.status);
     if (test.error) {
-      console.log(`   ❌ Hata:`, test.error);
+      console.log(`   ❌ Error:`, test.error);
     }
     if (test.details) {
-      console.log(`   ℹ️  Detaylar:`, test.details);
+      console.log(`   ℹ️  Details:`, test.details);
     }
   });
   if (window.webSocketMonitor.enabled) {
-    addMonitorLog('TEST', 'Manuel WebSocket testi tamamlandı', testResults);
+    addMonitorLog('TEST', 'Manual WebSocket test completed', testResults);
   }
 
   return testResults;
 }
 
 export function startWebSocketMonitor() {
-  console.log('🔍 WEBSOCKET MONITOR BAŞLATILIYOR...');
+  console.log('🔍 WEBSOCKET MONITOR STARTING...');
 
   window.webSocketMonitor.enabled = true;
   window.webSocketMonitor.startTime = new Date();
-  window.webSocketMonitor.connectionStatus = 'izleniyor';
+  window.webSocketMonitor.connectionStatus = 'monitoring';
 
-  addMonitorLog('MONITOR', 'WebSocket monitor başlatıldı');
+  addMonitorLog('MONITOR', 'WebSocket monitor started');
 
   const statusInterval = setInterval(() => {
     if (!window.webSocketMonitor.enabled) {
@@ -843,20 +843,20 @@ export function startWebSocketMonitor() {
     }
 
     const stats = getMonitorStats();
-    addMonitorLog('DURUM', 'Sistem durumu raporu', stats);
+    addMonitorLog('STATUS', 'System status report', stats);
 
   }, 30000);
 
   window.stopWebSocketMonitor = function() {
-    console.log('🔍 WEBSOCKET MONITOR DURDURULUYOR...');
+    console.log('🔍 WEBSOCKET MONITOR STOPPING...');
     window.webSocketMonitor.enabled = false;
     clearInterval(statusInterval);
-    addMonitorLog('MONITOR', 'WebSocket monitor durduruldu');
+    addMonitorLog('MONITOR', 'WebSocket monitor stopped');
   };
 
-  console.log('✅ WebSocket Monitor aktif. Durdurmak için: stopWebSocketMonitor()');
-  console.log('📊 Monitor istatistiklerini görmek için: getMonitorStats()');
-  console.log('🗑️  Logları temizlemek için: clearMonitorLogs()');
+  console.log('✅ WebSocket Monitor active. To stop: stopWebSocketMonitor()');
+  console.log('📊 To see monitor stats: getMonitorStats()');
+  console.log('🗑️  To clear logs: clearMonitorLogs()');
 
   return {
     stop: window.stopWebSocketMonitor,
@@ -928,11 +928,11 @@ function onJfMediaSourceId(e) {
     window.currentPlayingItemId =
       itemId || window.currentPlayingItemId;
     if (isDevEnvironment()) {
-      console.log("Hızlı MediaSourceId (event):", mediaSourceId);
+      console.log("Quick MediaSourceId (event):", mediaSourceId);
     }
 
     if (window.webSocketMonitor.enabled) {
-      addMonitorLog('MEDYA_KAYNAĞI', 'MediaSourceId event ile güncellendi', {
+      addMonitorLog('MEDIA_SOURCE', 'MediaSourceId updated via event', {
         mediaSourceId,
         itemId
       });

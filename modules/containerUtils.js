@@ -163,7 +163,8 @@ export async function createActorSlider(People, config, item) {
         actualPeople = parent.People;
       }
     } catch (e) {
-      console.warn("Ana dizi bilgileri alınamadı:", e);
+      console.warn("Could not retrieve parent series info:", e);
+      console.warn("Could not retrieve parent series info:", e);
     }
   }
 

@@ -944,7 +944,7 @@ export function openPersonalExplorer() {
       grid.appendChild(frag);
       pruneGridIfNeeded();
     } catch (e) {
-      console.error("Personal explorer sample yüklenemedi:", e);
+      console.error("Personal explorer sample load failed:", e);
       __p_overlay.querySelector('.ge-empty').style.display = '';
     }
   })();

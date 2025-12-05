@@ -254,7 +254,7 @@ async function fetchAndCacheQuality(itemId) {
     }
   } catch (error) {
     if (error?.name !== 'QuotaExceededError') {
-      console.error('Kalite bilgisi alınırken hata oluştu:', error);
+      console.error('Error fetching quality info:', error);
     }
     throw error;
   }
@@ -324,7 +324,7 @@ async function processCard(card, itemId) {
     if (quality && card.isConnected) createBadge(card, quality);
   } catch (error) {
     if (error?.name !== 'QuotaExceededError') {
-      console.error(`Kart işlenirken hata oluştu (${itemId}):`, error);
+      console.error(`Error processing card (${itemId}):`, error);
     }
   }
 }
