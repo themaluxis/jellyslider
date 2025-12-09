@@ -5,12 +5,19 @@
 # ==========================================
 # Update these to match your setup
 CONTAINER="Jellyfin"
+DOWNLOAD_URL="https://github.com/themaluxis/jellyslider/releases/download/latest/jellyslider.zip"
 
 # Paths
 # We use 'slider' as the directory name because main.js hardcodes paths like '/slider/src/...'
 CRX_DIR="/jellyfin/jellyfin-web/slider"
 WEB_DIR="/jellyfin/jellyfin-web"
 TMP_DIR="$(mktemp -d)"
+
+# ==========================================
+# PRE-FLIGHT CHECKS
+# ==========================================
+command -v curl >/dev/null 2>&1 || { echo "❌ Error: 'curl' is required but not installed."; exit 1; }
+command -v unzip >/dev/null 2>&1 || { echo "❌ Error: 'unzip' is required but not installed."; exit 1; }
 
 # ==========================================
 # FUNCTIONS
@@ -26,15 +33,25 @@ trap cleanup EXIT
 echo "📦 Starting Jellyslider installation..."
 
 # ==========================================
-# STEP 1: Prepare Local Files
+# STEP 1: Download & Extract
 # ==========================================
-echo "📂 Preparing local files..."
+echo "⬇️  Downloading Jellyslider archive..."
 mkdir -p "$TMP_DIR/slider"
 
-# Copy jellyslider files to temp dir
-# We copy everything from current dir except the temp dir itself and hidden files
-cp main.js auth.js "$TMP_DIR/slider/"
-cp -r modules src language list "$TMP_DIR/slider/" 2>/dev/null || true
+# Download the archive
+if ! curl -L -f -o "$TMP_DIR/archive.zip" "$DOWNLOAD_URL"; then
+    echo "❌ Error: Failed to download archive from $DOWNLOAD_URL"
+    exit 1
+fi
+
+echo "📂 Extracting files..."
+# Unzip contents directly into the slider directory
+unzip -q "$TMP_DIR/archive.zip" -d "$TMP_DIR/slider"
+
+# Sanity Check: Ensure the zip actually contained the expected structure
+if [ ! -d "$TMP_DIR/slider/modules" ]; then
+    echo "⚠️  Warning: 'modules' folder not found after extraction. The zip structure might be incorrect."
+fi
 
 # ==========================================
 # STEP 2: Prepare Container Directories
@@ -65,11 +82,17 @@ echo "📝 Modifying index.html..."
 docker cp "$CONTAINER:$WEB_DIR/index.html" "$TMP_DIR/index.html"
 
 # 2. Check if already modified and restore from backup if needed
-# This ensures we always start from a clean state (idempotency)
 if grep -q "slider/main.js" "$TMP_DIR/index.html" || grep -q "jellyfin-crx" "$TMP_DIR/index.html"; then
     echo "   ℹ️  Existing modification detected. Restoring from backup..."
-    docker exec "$CONTAINER" bash -c "cp $WEB_DIR/bak/index.html $WEB_DIR/index.html"
-    # Download the restored file
+    
+    # Try to copy backup to live
+    if docker exec "$CONTAINER" bash -c "[ -f $WEB_DIR/bak/index.html ]"; then
+        docker exec "$CONTAINER" bash -c "cp $WEB_DIR/bak/index.html $WEB_DIR/index.html"
+    else
+        echo "   ⚠️  Backup not found inside container! Skipping restore."
+    fi
+    
+    # Download the clean/restored file
     docker cp "$CONTAINER:$WEB_DIR/index.html" "$TMP_DIR/index.html"
 else
     echo "   ℹ️  First time installation. Creating backup..."
@@ -77,13 +100,10 @@ else
 fi
 
 # 3. Prepare the injection code
-# We use /web/slider/ path.
+# Note: Ensure main.js exists in the zip root, otherwise update this path.
 INJECTION_CODE='<script type="module" async src="/web/slider/main.js"></script><script type="module" async src="/web/slider/modules/player/main.js"></script>'
 
 # 4. Inject before </body>
-# We replace </body> with INJECTION_CODE</body>
-# We append a newline to ensure we don't accidentally delete the </body> tag if we were to grep -v later,
-# although restoring from backup makes that less of an issue.
 sed -i "s|</body>|${INJECTION_CODE}\n</body>|g" "$TMP_DIR/index.html"
 
 # 5. Upload modified index.html
@@ -97,7 +117,8 @@ echo ""
 echo "🎉 Installation complete!"
 echo ""
 echo "📋 Summary:"
-echo "  - Files: $CRX_DIR"
+echo "  - Source: $DOWNLOAD_URL"
+echo "  - Destination: $CRX_DIR"
 echo "  - Backup: $WEB_DIR/bak/index.html"
 echo ""
 echo "⚠️  Note: You MUST clear your browser cache (Ctrl+F5) to see changes."
