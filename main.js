@@ -56,14 +56,14 @@ window.__peakBooting = true;
     try {
       if (typeof getConfig === 'function') {
         const cfg = getConfig() || {};
-        return cfg.cssVariant || 'normalslider';
+        return cfg.cssVariant || 'peakslider';
       }
     } catch {}
     try {
       const cfg = JSON.parse(localStorage.getItem('jms-config')||'{}');
-      return cfg.cssVariant || 'normalslider';
+      return cfg.cssVariant || 'peakslider';
     } catch {}
-    return 'normalslider';
+    return 'peakslider';
   }
 
   const variant = getCssVariant();
@@ -146,7 +146,7 @@ function getPerSlideDurationMs() {
   return Number.isFinite(cfg.sliderDuration) ? cfg.sliderDuration
        : Number.isFinite(cfg.slideDurationMs) ? cfg.slideDurationMs
        : Number.isFinite(cfg.autoSlideIntervalMs) ? cfg.autoSlideIntervalMs
-       : 15000;
+       : 8000;
 }
 
 function getCycleDurationMs() {
@@ -271,7 +271,7 @@ function getSlideDurationMs() {
 
   if (config && Number.isFinite(config.autoSlideIntervalMs)) return config.autoSlideIntervalMs;
   if (config && Number.isFinite(config.slideDurationMs)) return config.slideDurationMs;
-  return 15000;
+  return 8000;
 }
 
 (function applySafePauseShim() {
@@ -908,7 +908,7 @@ export async function slidesInit() {
       undefined;
     const savedLimit = Number.isFinite(cfgLimit)
       ? cfgLimit
-      : parseInt(localStorage.getItem("limit") || "20", 10);
+      : parseInt(localStorage.getItem("limit") || "8", 10);
     window.myUserId = userId;
     window.myListUrl = `/slider/list/list_${userId}.txt`;
 
@@ -978,7 +978,7 @@ export async function slidesInit() {
           }
         }
 
-        const maxShufflingLimit = parseInt(config.maxShufflingLimit || "2000", 10);
+        const maxShufflingLimit = parseInt(config.maxShufflingLimit || "100", 10);
         const res = await fetch(`/Users/${userId}/Items?${queryString}&Limit=${maxShufflingLimit}`, {
           headers: authHeaders,
         });

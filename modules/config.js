@@ -27,7 +27,7 @@ function readSmartAutoPause() {
   const ignoreShort  = _num(localStorage.getItem('ignoreShortUnderSec'), 300);
 
   const sapLegacy = {
-    enabled: true,
+    enabled: false,
     blurMinutes: unfocusMs > 0 ? (unfocusMs / 60000) : 0.5,
     hiddenMinutes: offscreenMs > 0 ? (offscreenMs / 60000) : 0.2,
     idleMinutes: idleMs > 0 ? (idleMs / 60000) : 45,
@@ -117,7 +117,7 @@ export function getConfig() {
 
   const defaultLanguage = getDefaultLanguage();
   return {
-    customQueryString: localStorage.getItem('customQueryString') || 'IncludeItemTypes=Movie,Series&Recursive=true&hasOverview=true&imageTypes=Logo,Backdrop&sortBy=DateCreated&sortOrder=Descending',
+    customQueryString: localStorage.getItem('customQueryString') || 'IncludeItemTypes=Movie,Series&Recursive=true&hasOverview=true&imageTypes=Logo,Backdrop&sortBy=PremiereDate&sortOrder=Descending',
     sortingKeywords: (() => {
       const raw = localStorage.getItem('sortingKeywords');
       try {
@@ -276,7 +276,7 @@ export function getConfig() {
     renderResume: parseInt(localStorage.getItem("renderResume"), 10) || 10,
     enableRenderResume: localStorage.getItem('enableRenderResume') !== 'false',
     toastGroupThreshold: parseInt(localStorage.getItem("toastGroupThreshold"), 10) || 5,
-    enableCounterSystem: localStorage.getItem('enableCounterSystem') !== 'false',
+    enableCounterSystem: localStorage.getItem('enableCounterSystem') === 'true',
 
     enableDirectorRows: localStorage.getItem('enableDirectorRows') !== 'false',
     directorRowsCount: parseInt(localStorage.getItem("directorRowsCount"), 10) || 4,
