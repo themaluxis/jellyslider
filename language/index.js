@@ -28,7 +28,7 @@ export function detectBrowserLanguage() {
     if (code.startsWith('fr') || base === 'fr') return 'fre';
     if (code.startsWith('ru') || base === 'ru') return 'rus';
   }
-  return 'tur';
+  return 'fre';
 }
 
 export function getStoredLanguagePreference() {
